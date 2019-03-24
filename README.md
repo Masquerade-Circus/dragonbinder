@@ -1,4 +1,8 @@
 [![npm version](https://img.shields.io/npm/v/dragonbinder.svg?style=flat)](https://npmjs.org/package/dragonbinder "View this project on npm")
+![](https://img.shields.io/bundlephobia/min/dragonbinder.svg?style=flat)
+![](https://img.shields.io/bundlephobia/minzip/dragonbinder.svg?style=flat)
+
+
 [![Build Status](https://travis-ci.org/Masquerade-Circus/dragonbinder.svg?branch=master)](https://travis-ci.org/Masquerade-Circus/dragonbinder)
 [![Dependencies](https://img.shields.io/david/masquerade-circus/dragonbinder.svg?style=flat)](https://david-dm.org/masquerade-circus/dragonbinder)
 ![](https://img.shields.io/github/issues/masquerade-circus/dragonbinder.svg)
@@ -237,10 +241,15 @@ store.commit('increment');
 ```
 
 ## Development, Build and Tests 
+
 Use `yarn dev` to watch and compile the library on every change to it. 
+
 Use `yarn build` to build the library. 
-Use `yarn test` to run tests only once
+
+Use `yarn test` to run tests only once.
+
 Use `yarn dev:test` to run the tests watching changes to library and tests.
+
 Use `yarn dev:test:nyc` to run the tests watching changes and get the test coverage at last.
 
 ## Contributing
