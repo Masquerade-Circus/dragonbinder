@@ -88,27 +88,27 @@ test('Mutate the state by dispatch', async (t) => {
   expect(store.state.b).toEqual([1, 2]);
 });
 
-test('Throw error if you try to dispatch an undefined action', async (t) => {
+test('Throw error if you try to dispatch an undefined action', (t) => {
   let store = getNewStore();
   expect(() => store.dispatch('hello')).toThrowError('The action "hello" does not exists.');
 });
 
-test('Use a getter to obtain a property from the state', async (t) => {
+test('Use a getter to obtain a property from the state', (t) => {
   let store = getNewStore();
   expect(store.getters.items).toEqual([1]);
 });
 
-test('Use a getter to obtain data using another getter', async (t) => {
+test('Use a getter to obtain data using another getter', (t) => {
   let store = getNewStore();
   expect(store.getters.length).toEqual(1);
 });
 
-test('Fail silently if you try to get an undefined getter, getter must return undefined', async (t) => {
+test('Fail silently if you try to get an undefined getter, getter must return undefined', (t) => {
   let store = getNewStore();
   expect(store.getters.ok).toBeUndefined();
 });
 
-test('Subscribe a named method to listen for changes', async (t) => {
+test('Subscribe a named method to listen for changes', (t) => {
   let store = getNewStore();
   let count = 0;
   let method = () => count++;
@@ -118,7 +118,7 @@ test('Subscribe a named method to listen for changes', async (t) => {
   expect(count).toEqual(1);
 });
 
-test('Unsubscribe a named method to listen for changes', async (t) => {
+test('Unsubscribe a named method to listen for changes', (t) => {
   let store = getNewStore();
   let count = 0;
   let method = () => count++;
@@ -131,7 +131,7 @@ test('Unsubscribe a named method to listen for changes', async (t) => {
   expect(count).toEqual(1);
 });
 
-test('Unsubscribe an anonymous method by returned unsubscribe callback', async (t) => {
+test('Unsubscribe an anonymous method by returned unsubscribe callback', (t) => {
   let store = getNewStore();
   let count = 0;
   expect(count).toEqual(0);
@@ -143,17 +143,17 @@ test('Unsubscribe an anonymous method by returned unsubscribe callback', async (
   expect(count).toEqual(1);
 });
 
-test('Throw error if you try to subscribe something other than a function', async (t) => {
+test('Throw error if you try to subscribe something other than a function', (t) => {
   let store = getNewStore();
   expect(() => store.subscribe('hello')).toThrowError('You need to provide a valid function to subscribe.');
 });
 
-test('Throw error if you try to unsubscribe something other than a function', async (t) => {
+test('Throw error if you try to unsubscribe something other than a function', (t) => {
   let store = getNewStore();
   expect(() => store.unsubscribe('hello')).toThrowError('You need to provide a valid function to unsubscribe.');
 });
 
-test('Subscribe a named method only once', async (t) => {
+test('Subscribe a named method only once', (t) => {
   let store = getNewStore();
   let count = 0;
   let method = () => count++;
@@ -164,3 +164,26 @@ test('Subscribe a named method only once', async (t) => {
   store.commit('increment');
   expect(count).toEqual(1);
 });
+
+test('Create empty state if state is not passed', (t) => {
+  let store = createStore({});
+  expect(store.state).toBeDefined();
+});
+
+test('Use deepFrozen to froze the state', (t) => {
+  let store = createStore({
+    state: {
+      a: {
+        b: {
+          c: {
+            d: null
+          },
+          d: null
+        }
+      }
+    }
+  });
+
+  expect(Object.isFrozen(store.state.a.b.c.d)).toBeTruthy();
+});
+

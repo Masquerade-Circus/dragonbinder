@@ -57,8 +57,14 @@
     ]
   },
   "nyc": {
+    "include": [
+      "lib"
+    ],
     "exclude": [
-      "tests"
+      "rollup.js",
+      "tests",
+      "dist",
+      "node_modules"
     ]
   }
 }

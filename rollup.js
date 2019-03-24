@@ -26,7 +26,7 @@ let inputOptions = {
     sourcemaps(),
     filesize(),
     buble({ target: { chrome: 70, firefox: 60, safari: 10, node: 8 } }),
-    terser({ warnings: 'verbose', compress: {passes: 2} })
+    terser({ warnings: 'verbose', compress: {passes: 1} })
   ],
   cache: undefined
 };
