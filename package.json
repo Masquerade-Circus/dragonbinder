@@ -1,0 +1,65 @@
+{
+  "name": "dragonbinder",
+  "version": "1.0.0",
+  "description": "A tiny, less than 1kb, framework agnostic, state managment library inspired by Vuex.",
+  "main": "dist/dragonbinder.min.js",
+  "repository": "git@github.com:Masquerade-Circus/dragonbinder.git",
+  "author": "Masquerade Circus <christian@masquerade-circus.net>",
+  "license": "Apache-2.0",
+  "private": false,
+  "keywords": [
+    "store",
+    "state",
+    "state-management",
+    "reactive",
+    "vuex",
+    "redux",
+    "flux",
+    "manager"
+  ],
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development node rollup.js",
+    "build": "cross-env NODE_ENV=production node rollup.js",
+    "dev:test": "cross-env NODE_ENV=development ava --watch --verbose",
+    "dev:test:nyc": "cross-env NODE_ENV=development nodemon -w ./tests -w ./lib --exec 'nyc ava --verbose'",
+    "test": "nyc ava",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "devDependencies": {
+    "ava": "^1.2.1",
+    "coveralls": "^3.0.3",
+    "cross-env": "^5.2.0",
+    "eslint": "^5.15.1",
+    "eslint-plugin-sonarjs": "^0.3.0",
+    "esm": "^3.2.20",
+    "expect": "^24.1.0",
+    "nyc": "^13.3.0",
+    "rollup": "^1.4.1",
+    "rollup-plugin-buble": "^0.19.6",
+    "rollup-plugin-commonjs": "^9.2.1",
+    "rollup-plugin-filesize": "^6.0.1",
+    "rollup-plugin-includepaths": "^0.2.3",
+    "rollup-plugin-node-resolve": "^4.0.1",
+    "rollup-plugin-progress": "^1.0.0",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-terser": "^4.0.4"
+  },
+  "ava": {
+    "files": [
+      "tests/**/*_test.js"
+    ],
+    "sources": [
+      "**/*.{js,jsx}"
+    ],
+    "failWithoutAssertions": false,
+    "require": [
+      "esm"
+    ]
+    
+  },
+  "nyc": {
+    "exclude": [
+      "tests"
+    ]
+  }
+}

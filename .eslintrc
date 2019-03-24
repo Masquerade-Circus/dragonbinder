@@ -1,0 +1,79 @@
+{
+  "plugins": ["sonarjs"],
+  "extends": ["plugin:sonarjs/recommended"],
+  "rules": {
+    "array-bracket-spacing": 2,
+    "brace-style": 2,
+    "comma-dangle": 2,
+    "comma-spacing": 2,
+    "comma-style": 2,
+    "curly": 2,
+    "dot-notation": 2,
+    "eol-last": 2,
+    "eqeqeq": ["error", "smart"],
+    "key-spacing": 2,
+    "keyword-spacing": 2,
+    "new-cap": 0,
+    "no-empty": [2, { "allowEmptyCatch": true }],
+    "no-eval": 2,
+    "no-implied-eval": 2,
+    "no-mixed-spaces-and-tabs": 2,
+    "no-multi-str": 2,
+    "no-sequences": 2,
+    "no-trailing-spaces": 2,
+    "no-underscore-dangle": 2,
+    "no-use-before-define": 2,
+    "no-with": 2,
+    "semi-spacing": 2,
+    "space-before-blocks": 2,
+    "space-before-function-paren": [
+      2,
+      { "anonymous": "always", "named": "never" }
+    ],
+    "space-in-parens": 2,
+    "space-infix-ops": 2,
+    "space-unary-ops": 2,
+    "vars-on-top": 2,
+    "wrap-iife": 2,
+    "semi": [2, "always"],
+    "indent": [
+      2,
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "valid-jsdoc": 2,
+    "no-var": "error",
+    "no-undef": 1,
+    "no-multi-spaces": "error",
+    "no-multiple-empty-lines": "error",
+    "one-var": "off",
+    "no-continue": "off",
+    "no-new-func": "warn",
+    "no-plusplus": "off",
+    "no-console": "warn",
+    "complexity": ["warn", 20],
+    "sonarjs/cognitive-complexity": ["warn", 20],
+    "max-lines-per-function": [
+      "warn",
+      { "max": 300, "skipBlankLines": true, "skipComments": true }
+    ],
+    "max-len": ["error", 120],
+    "max-statements-per-line": ["error", { "max": 3 }]
+  },
+  "env": {
+    "shared-node-browser": true,
+    "browser": true,
+    "node": true,
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 9,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+      "modules": true
+    }
+  }
+}
