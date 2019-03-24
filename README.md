@@ -12,7 +12,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/Masquerade-Circus/dragonbinder/badge.svg?branch=master)](https://coveralls.io/github/Masquerade-Circus/dragonbinder?branch=master)
 [![License](https://img.shields.io/github/license/masquerade-circus/dragonbinder.svg)](https://github.com/masquerade-circus/dragonbinder/blob/master/LICENSE)
 
-# dragonbinder
+# Dragonbinder
 A tiny, less than 1kb, framework agnostic, state managment library inspired by Vuex.
 
 ## Table of Contents
@@ -75,7 +75,7 @@ console.log(store.state.count) // -> 1
 Dragonbinder use Proxies to create a state as a "single source of truth" which cannot be changed unless you commit a mutation. 
 This is, you cannot delete, modify or add a property directly. This allow us to keep track of all changes we made to the state.
 
-// If you don't provide a initial state by the state property, Dragonbinder will create one.
+If you don't provide an initial state by the state property, Dragonbinder will create one.
 
 ```javascript
 const store = createStore({
@@ -108,7 +108,7 @@ store.commit('removeProperty');
 
 ### Getters 
 As with Vue, with Dragonbinder you can create getters to create computed properties based on the state. 
-This getters will receive the state as first argument and all oteher getters as second.
+This getters will receive the state as first argument and all other getters as second.
 
 ```javascript
 const store = createStore({
@@ -135,14 +135,14 @@ const store = createStore({
 });
 
 console.log(store.getters.completed); // -> { content: 'Second', completed: true }
-console.log(store.getters.length); // -> 1
+console.log(store.getters.completedCount); // -> 1
 ```
 
 ### Mutations
 Mutations are the only way to change the state and you must consider the next points when designing mutations.
 
 -   Following the Vuex pattern, mutations must be synchronous.
--   Note that with Dragonbinder the state is deep frozen using `Object.freeze` to prevent direct changes. So, when you are changing the state by using a mutation, you can add, modify or delete only the fist level properties, second level properties will be read only.
+-   Note that with Dragonbinder the state is deep frozen using `Object.freeze` to prevent direct changes. So, when you are changing the state by using a mutation, you can add, modify or delete only fist level properties, second level properties will be read only.
 -   Unlike many other libraries you can pass any number of arguments to a mutation.
 
 ```javascript

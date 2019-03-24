@@ -65,7 +65,7 @@ test('Throw error if you try to remove a deeper property directly', (t) => {
   expect(() => delete store.state.c.a).toThrowError("Cannot delete property 'a' of #<Object>");
 });
 
-test('Mutate the state via commit', (t) => {
+test('Mutate the state by commit', (t) => {
   let store = getNewStore();
   expect(store.state.a).toEqual(0);
   store.commit('increment', 1);
@@ -81,7 +81,7 @@ test('Throw error if you try to commit an undefined mutation', (t) => {
   expect(() => store.commit('hello')).toThrowError('The mutation "hello" does not exists.');
 });
 
-test('Mutate the state via dispatch', async (t) => {
+test('Mutate the state by dispatch', async (t) => {
   let store = getNewStore();
   expect(store.state.b).toEqual([1]);
   await store.dispatch('pushB', 2);
@@ -131,7 +131,7 @@ test('Unsubscribe a named method to listen for changes', async (t) => {
   expect(count).toEqual(1);
 });
 
-test('Unsubscribe a anonymous method via a returned unsubscribe callback', async (t) => {
+test('Unsubscribe an anonymous method by returned unsubscribe callback', async (t) => {
   let store = getNewStore();
   let count = 0;
   expect(count).toEqual(0);
