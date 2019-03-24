@@ -1,6 +1,6 @@
 {
   "name": "dragonbinder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tiny, less than 1kb, framework agnostic, state managment library inspired by Vuex.",
   "main": "dist/dragonbinder.min.js",
   "repository": "git@github.com:Masquerade-Circus/dragonbinder.git",
@@ -55,7 +55,6 @@
     "require": [
       "esm"
     ]
-    
   },
   "nyc": {
     "exclude": [
