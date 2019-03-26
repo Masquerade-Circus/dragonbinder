@@ -1,6 +1,6 @@
 import test from 'ava';
 import expect from 'expect';
-import createStore from '../lib';
+import Dragonbinder from '../lib';
 
 function getNewStore() {
   let mainModule = {
@@ -42,8 +42,30 @@ function getNewStore() {
     }
   };
 
-  return createStore(mainModule);
+  return new Dragonbinder(mainModule);
 }
+
+test('Create empty state if state is not passed', (t) => {
+  let store = new Dragonbinder();
+  expect(store.state).toBeDefined();
+});
+
+test('Use deepFrozen to froze the state', (t) => {
+  let store = new Dragonbinder({
+    state: {
+      a: {
+        b: {
+          c: {
+            d: null
+          },
+          d: null
+        }
+      }
+    }
+  });
+
+  expect(Object.isFrozen(store.state.a.b.c.d)).toBeTruthy();
+});
 
 test('Throw error if you try to mutate the state directly', (t) => {
   let store = getNewStore();
@@ -108,82 +130,190 @@ test('Fail silently if you try to get an undefined getter, getter must return un
   expect(store.getters.ok).toBeUndefined();
 });
 
-test('Subscribe a named method to listen for changes', (t) => {
+test('Use plugins', (t) => {
+  let store = new Dragonbinder();
+  let params = [];
+  let plugin = (...args) => {
+    params.push(args);
+  };
+  store.use(plugin, 'option1', 'option2');
+  store.use(plugin, 'option1', 'option2');
+  expect(params).toEqual([
+    [
+      expect.any(Dragonbinder),
+      'option1',
+      'option2'
+    ]
+  ]);
+});
+
+test('Add a listener', (t) => {
   let store = getNewStore();
   let count = 0;
   let method = () => count++;
   expect(count).toEqual(0);
-  store.subscribe(method);
-  store.commit('increment');
+  store.on('set', method);
+  store.commit('increment', 1);
   expect(count).toEqual(1);
 });
 
-test('Unsubscribe a named method to listen for changes', (t) => {
+test('Remove a named listener', (t) => {
   let store = getNewStore();
   let count = 0;
   let method = () => count++;
   expect(count).toEqual(0);
-  store.subscribe(method);
+  store.on('set', method);
   store.commit('increment');
   expect(count).toEqual(1);
-  store.unsubscribe(method);
+  store.off('set', method);
   store.commit('increment');
   expect(count).toEqual(1);
 });
 
-test('Unsubscribe an anonymous method by returned unsubscribe callback', (t) => {
+test('Remove an anonymous method by returned remove callback', (t) => {
   let store = getNewStore();
   let count = 0;
   expect(count).toEqual(0);
-  let unsubscribe = store.subscribe(() => count++);
+  let removeListener = store.on('set', () => count++);
   store.commit('increment');
   expect(count).toEqual(1);
-  unsubscribe();
+  removeListener();
   store.commit('increment');
   expect(count).toEqual(1);
 });
 
-test('Throw error if you try to subscribe something other than a function', (t) => {
+test('Throw error if you try to listen with something other than a function', (t) => {
   let store = getNewStore();
-  expect(() => store.subscribe('hello')).toThrowError('You need to provide a valid function to subscribe.');
+  expect(() => store.on('set', 'hello')).toThrowError('You need to provide a valid function as listener.');
 });
 
-test('Throw error if you try to unsubscribe something other than a function', (t) => {
+test('Throw error if you try to remove a listener that is something other than a function', (t) => {
   let store = getNewStore();
-  expect(() => store.unsubscribe('hello')).toThrowError('You need to provide a valid function to unsubscribe.');
+  expect(() => store.off('set', 'hello')).toThrowError('You need to provide a valid function as listener.');
 });
 
-test('Subscribe a named method only once', (t) => {
+test('Add a listener only once', (t) => {
   let store = getNewStore();
   let count = 0;
   let method = () => count++;
   expect(count).toEqual(0);
-  store.subscribe(method);
-  store.subscribe(method);
-  store.subscribe(method);
+  store.on('set', method);
+  store.on('set', method);
+  store.on('set', method);
   store.commit('increment');
   expect(count).toEqual(1);
 });
 
-test('Create empty state if state is not passed', (t) => {
-  let store = createStore({});
-  expect(store.state).toBeDefined();
+test('Test all listeners', async (t) => {
+  let store = getNewStore();
+  let events = [
+    'addlistener',
+    'removelistener',
+    'set',
+    'delete',
+    'beforecommit',
+    'commit',
+    'beforedispatch',
+    'dispatch',
+    'getter',
+    'plugin'
+  ];
+  let methods = events.reduce((methods, event) => {
+    methods[event] = {
+      params: [],
+      method: (...params) => methods[event].params.push(params)
+    };
+    return methods;
+  }, {});
+
+  events.forEach(event => store.on(event, methods[event].method));
+  store.getters.length;
+  await store.dispatch('pushB', 1);
+  store.commit('deleteB');
+  let plugin = () => {};
+  store.use(plugin);
+  events.forEach(event => store.off(event, methods[event].method));
+
+  // Add listener event
+  expect(methods.addlistener.params.length).toEqual(events.length);
+  expect(methods.addlistener.params).toEqual(events.map(event => {
+    return [
+      expect.any(Dragonbinder), // The store
+      event, // The listener name
+      methods[event].method // The listener added
+    ];
+  }));
+
+  // Remove listener event
+  expect(methods.removelistener.params.length).toEqual(1);
+  expect(methods.removelistener.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'addlistener', // The listener name
+    methods.addlistener.method // The listener added
+  ]);
+
+
+  // Set event
+  expect(methods.set.params.length).toEqual(1);
+  expect(methods.set.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'b', // The property name
+    [1, 1], // The new value,
+    [1] // The old value
+  ]);
+
+  // Delete event
+  expect(methods.delete.params.length).toEqual(1);
+  expect(methods.delete.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'b', // The property name
+    [1, 1] // The old value
+  ]);
+
+  // Before commit event
+  expect(methods.beforecommit.params.length).toEqual(2);
+  expect(methods.beforecommit.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'pushB', // The mutation name
+    1 // The params passed to the mutation
+  ]);
+
+  // Commit event
+  expect(methods.commit.params.length).toEqual(2);
+  expect(methods.commit.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'pushB', // The mutation name
+    1 // The params passed to the mutation
+  ]);
+
+  // Before dispatch event,
+  expect(methods.beforedispatch.params.length).toEqual(1);
+  expect(methods.beforedispatch.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'pushB', // The action name
+    1 // The params passed to the mutation
+  ]);
+
+  // Dispatch event
+  expect(methods.dispatch.params.length).toEqual(1);
+  expect(methods.dispatch.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'pushB', // The action name
+    1 // The params passed to the mutation
+  ]);
+
+  // Getter event
+  expect(methods.getter.params.length).toEqual(2);
+  expect(methods.getter.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'items', // The getter name
+    [1] // The value of the getter
+  ]);
+
+  // Add plugin event
+  expect(methods.plugin.params.length).toEqual(1);
+  expect(methods.plugin.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    plugin // The plugin added
+  ]);
 });
-
-test('Use deepFrozen to froze the state', (t) => {
-  let store = createStore({
-    state: {
-      a: {
-        b: {
-          c: {
-            d: null
-          },
-          d: null
-        }
-      }
-    }
-  });
-
-  expect(Object.isFrozen(store.state.a.b.c.d)).toBeTruthy();
-});
-

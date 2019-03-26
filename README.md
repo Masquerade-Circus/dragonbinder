@@ -13,18 +13,19 @@
 [![License](https://img.shields.io/github/license/masquerade-circus/dragonbinder.svg)](https://github.com/masquerade-circus/dragonbinder/blob/master/LICENSE)
 
 # Dragonbinder
-A tiny, less than 1kb, framework agnostic, state managment library inspired by Vuex.
+A tiny, less than 1kb gzipped, framework agnostic, state managment library inspired by Vuex.
 
 ## Table of Contents
 
 -   [Install](#install)
 -   [Features](#features)
 -   [Use](#use)
--   [State](#state)
--   [Getters](#getters)
--   [Mutations](#mutations)
--   [Actions](#actions)
--   [Listeners](#listeners)
+    -   [State](#state)
+    -   [Getters](#getters)
+    -   [Mutations](#mutations)
+    -   [Actions](#actions)
+    -   [Events](#events)
+    -   [Plugins](#plugins)
 -   [Tests](#tests)
 -   [Contributing](#contributing)
 -   [Legal](#legal)
@@ -49,14 +50,15 @@ Or you can use it standalone in the browser with:
 -   [x] Getters.
 -   [x] Mutations.
 -   [x] Actions.
--   [x] Listeners.
+-   [x] Event listeners.
+-   [x] Plugins
 
 ## Use
 
 ```javascript
-const createStore = require('dragonbinder');
+const Dragonbinder = require('dragonbinder');
 
-const store = createStore({
+const store = new Dragonbinder({
   state: {
     count: 0
   },
@@ -73,12 +75,12 @@ console.log(store.state.count) // -> 1
 
 ### State
 Dragonbinder use Proxies to create a state as a "single source of truth" which cannot be changed unless you commit a mutation. 
-This is, you cannot delete, modify or add a property directly. This allow us to keep track of all changes we made to the state.
+This means that you cannot delete, modify or add a property directly. This allow us to keep track of all changes we made to the state.
 
-If you don't provide an initial state by the state property, Dragonbinder will create one.
+If you don't provide an initial state by the state property Dragonbinder will create one.
 
 ```javascript
-const store = createStore({
+const store = new Dragonbinder({
   state: {
     count: 0
   },
@@ -111,7 +113,7 @@ As with Vue, with Dragonbinder you can create getters to create computed propert
 This getters will receive the state as first argument and all other getters as second.
 
 ```javascript
-const store = createStore({
+const store = new Dragonbinder({
   state: {
     todos: [
       {
@@ -146,7 +148,7 @@ Mutations are the only way to change the state and you must consider the next po
 -   Unlike many other libraries you can pass any number of arguments to a mutation.
 
 ```javascript
-const store = createStore({
+const store = new Dragonbinder({
   state: {
     hello: {
       name: 'John Doe'
@@ -177,7 +179,7 @@ store.commit('changeNameTo', 'Jane', 'Doe');
 ### Actions
 If you need to handle async functions you must use actions. And actions will always return a promise as result of calling them. 
 ```javascript 
-const store = createStore({
+const store = new Dragonbinder({
   state: {
     count: 0
   },
@@ -201,12 +203,11 @@ const store = createStore({
 store.dispatch('increment').then(() => console.log(store.state.count)); // -> 1 after one second
 ```
 
-### Listeners
-You can register/unregister callbacks to listen for changes. 
-The callback will receive the state as the first argument, the property that was changed as second, the new value as third and the old value as the last argument.
+### Events
+You can register/unregister callbacks to events.
 
 ```javascript 
-const store = createStore({
+const store = new Dragonbinder({
   state: {
     count: 0
   },
@@ -217,27 +218,71 @@ const store = createStore({
   }
 });
 
-// Subscribe a named method
-let namedListener = (state, prop, newVal, oldVal) => console.log(`The property ${prop} was changed from ${oldVal} to ${newVal}`);
-store.subscribe(namedListener);
+// Add a named listener
+let namedListener = (store, prop, newVal, oldVal) => console.log(`The property ${prop} was changed from ${oldVal} to ${newVal}`);
+store.on('set', namedListener);
 
-// Subscribe an anonymous method
-let unsubscribeAnon = store.subscribe(() => console.log('Anonymous method triggered'));
+// Add an anonymous listener
+let removeAnonymousListener = store.on('set', () => console.log('Anonymous listener triggered'));
 
-// Committing increment will trigger the listeners
-store.commit('increment'); 
+// Committing increment will trigger the listener
+store.commit('increment');
 // $ The property count was changed from 0 to 1
-// $ Anonymous method triggered
+// $ Anonymous listener triggered
 
-// Unsubscribe a named method 
-store.unsubscribe(namedListener);
+// Remove a named listener 
+store.off('set', namedListener);
 
-// Unsubscribe an anonyous method 
-unsubscribeAnon();
+// Remove an anonyous listener 
+removeAnonymousListener();
 
-// Committing increment will do nothing as the listeners are already unsubscribed
+// Committing increment will do nothing as the listeners are already removed
 store.commit('increment'); 
 
+```
+
+#### Event types
+Event name | Its called when | Params received by place
+-----------|-----------------|-------
+addlistener | Add an event listener | (1) Store instance  - (2) Event name - (3) Listener added 
+removelistener | Remove an event listener | (1) Store instance - (2) Event name - (3) Listener removed
+set | A property of the state is added or modified | (1) Store instance - (2) The property name - (3) The new value - (4) The old value 
+delete | A property of the state is deleted | (1) Store instance - (2) The property name - (3) The old value 
+beforecommit | Commit method called and before apply the mutation | (1) Store instance - (2) The mutation name - (...n) The arguments passed to the mutation 
+commit | Commit method called and after apply the mutation | (1) Store instance - (2) The mutation name - (...n) The arguments passed to the mutation 
+beforedispatch | Dispatch method called and before apply the action | (1) Store instance - (2) The action name - (...n) The arguments passed to the action
+dispatch | Dispatch method called and after apply the action | (1) Store instance - (2) The action name - (...n) The arguments passed to the action 
+getter | A getter is called | (1) Store instance - (2) The getter name - (3) The value of the getter
+plugin | A plugin is added | (1) Store instance - (2) The plugin added - (...n) The options passed to the plugin
+
+### Plugins
+Dragonbinder comes with a very simple but very powerfull plugin system.
+You can extend its core functionality or change it completly by making use of plugins. 
+
+#### Using plugins
+```javascript
+let store = new Dragonbinder();
+store.use(myPlugin, ...options);
+```
+
+#### Creating plugins
+A Dragonbinder plugin is a module that exports a single function that will be called
+with the store instance as first argument and optionaly with the passed options if any.
+```javascript
+const Dragonbinder = require('dragonbinder');
+const myPlugin = (store, ...options) => {
+
+  Dragonbinder.myGlobalMethod = function() {
+    // Awesome code here
+  };
+  Dragonbinder.fn.myPrototypeMethod = function() {
+    // Awesome code here
+  };
+
+  store.myLocalMethod = function() {
+    // Awesome code here
+  };
+};
 ```
 
 ## Development, Build and Tests 
