@@ -153,8 +153,10 @@ test('Add a listener', (t) => {
   let method = () => count++;
   expect(count).toEqual(0);
   store.on('set', method);
+  store.on('delete', method);
   store.commit('increment', 1);
-  expect(count).toEqual(1);
+  store.commit('deleteB');
+  expect(count).toEqual(2);
 });
 
 test('Remove a named listener', (t) => {
@@ -190,6 +192,11 @@ test('Throw error if you try to listen with something other than a function', (t
 test('Throw error if you try to remove a listener that is something other than a function', (t) => {
   let store = getNewStore();
   expect(() => store.off('set', 'hello')).toThrowError('You need to provide a valid function as listener.');
+});
+
+test('Fail silently if you try to remove an already removed or not added listener', (t) => {
+  let store = getNewStore();
+  store.off('set', () => {});
 });
 
 test('Add a listener only once', (t) => {
@@ -316,4 +323,435 @@ test('Test all listeners', async (t) => {
     expect.any(Dragonbinder), // The store
     plugin // The plugin added
   ]);
+});
+
+test('Register nested modules', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    }
+  });
+
+  expect(store.init.modules).toEqual({
+    'my.module': expect.any(Dragonbinder)
+  });
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'world'
+    }
+  }));
+});
+
+test('Unregister nested modules', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    }
+  });
+
+  expect(store.init.modules).toEqual({
+    'my.module': expect.any(Dragonbinder)
+  });
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'world'
+    }
+  }));
+
+  store.unregisterModule('my.module');
+
+  expect(store.init.modules).toEqual({});
+  expect(store.state['my.module']).toBeUndefined();
+});
+
+test('Call a nested module mutation', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    }
+  });
+
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'world'
+    }
+  }));
+
+  store.commit('my.module.change');
+
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'mundo'
+    }
+  }));
+});
+
+test('Throw error if try to call a mutation of a non existent module', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    }
+  });
+
+  expect(() => store.commit('my.module.not.change'))
+    .toThrowError('The module "my.module.not" does not exists.');
+});
+
+test('Throw error if mutation of a nested module does not exists', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    }
+  });
+
+  expect(() => store.commit('my.module.not-change'))
+    .toThrowError('The mutation "not-change" does not exists.');
+});
+
+test('Call a nested module action', async () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    actions: {
+      change(store) {
+        store.commit('change');
+      }
+    }
+  });
+
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'world'
+    }
+  }));
+
+  await store.dispatch('my.module.change');
+
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'mundo'
+    }
+  }));
+});
+
+test('Call a root action and mutation from a nested module action', async () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    actions: {
+      async change(store, payload) {
+        store.rootStore.commit('increment', payload);
+        await store.rootStore.dispatch('pushB', payload);
+      }
+    }
+  });
+
+  expect(store.state).toEqual(expect.objectContaining({
+    a: 0,
+    b: [1]
+  }));
+
+  await store.dispatch('my.module.change', 5);
+
+  expect(store.state).toEqual(expect.objectContaining({
+    a: 5,
+    b: [1, 5]
+  }));
+});
+
+test('Throw error if try to call a action of a non existent module', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    actions: {
+      change(store) {
+        store.commit('change');
+      }
+    }
+  });
+
+  expect(() => store.dispatch('my.module.not.change'))
+    .toThrowError('The module "my.module.not" does not exists.');
+});
+
+test('Throw error if action of a nested module does not exists', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    actions: {
+      change(store) {
+        store.commit('change');
+      }
+    }
+  });
+
+  expect(() => store.dispatch('my.module.not-change'))
+    .toThrowError('The action "not-change" does not exists.');
+});
+
+test('Use a getter to obtain a property from the nested module state', (t) => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    getters: {
+      entity(state, getters) {
+        return state.hello;
+      },
+      capitalizedEntity(state, getters) {
+        return getters.entity.charAt(0).toUpperCase() + getters.entity.slice(1);
+      }
+    }
+  });
+  expect(store.getters['my.module.entity']).toEqual('world');
+});
+
+test('Use a nested module getter to obtain data using another nested getter', (t) => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    getters: {
+      entity(state, getters) {
+        return state.hello;
+      },
+      capitalizedEntity(state, getters) {
+        return getters.entity.charAt(0).toUpperCase() + getters.entity.slice(1);
+      }
+    }
+  });
+  expect(store.getters['my.module.capitalizedEntity']).toEqual('World');
+});
+
+test('Fail silently if you try to get an undefined nested module getter, getter must return undefined', (t) => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    getters: {
+      entity(state, getters) {
+        return state.hello;
+      },
+      capitalizedEntity(state, getters) {
+        return getters.entity.charAt(0).toUpperCase() + getters.entity.slice(1);
+      }
+    }
+  });
+  expect(store.getters['my.module.capitalized']).toBeUndefined();
+});
+
+test('Fail silently if you try to get a getter of a non existent nested module', (t) => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    getters: {
+      entity(state, getters) {
+        return state.hello;
+      },
+      capitalizedEntity(state, getters) {
+        return getters.entity.charAt(0).toUpperCase() + getters.entity.slice(1);
+      }
+    }
+  });
+  expect(store.getters['my.capitalized']).toBeUndefined();
+  expect(store.getters['other.capitalized']).toBeUndefined();
+});
+
+test('Use a getter to obtain a property from the root state and root getters', (t) => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    getters: {
+      length(state, getters, rootState, rootGetters) {
+        return rootGetters.items.length;
+      },
+      items(state, getters, rootState, rootGetters) {
+        return rootState.b;
+      }
+    }
+  });
+  expect(store.getters['my.module.length']).toEqual(1);
+  expect(store.getters['my.module.items']).toEqual([1]);
+});
+
+test('Register nested modules with initial modules property', () => {
+  let store = new Dragonbinder({
+    modules: {
+      'my.module': {
+        state: {hello: 'world'},
+        mutations: {
+          change(state) {
+            state.hello = 'mundo';
+          }
+        }
+      }
+    }
+  });
+
+  expect(store.init.modules).toEqual({
+    'my.module': expect.any(Dragonbinder)
+  });
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'world'
+    }
+  }));
+});
+
+test('Register nested modules with initial modules property and with child nested modules', () => {
+  let moduleA = {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    }
+  };
+
+  let moduleB = {
+    state: {hola: 'mundo'},
+    mutations: {
+      change(state) {
+        state.hola = 'world';
+      }
+    },
+    modules: {
+      a: moduleA
+    }
+  };
+
+  let store = new Dragonbinder({
+    modules: {
+      b: moduleB
+    }
+  });
+
+  expect(store.init.modules).toEqual({
+    b: expect.any(Dragonbinder),
+    'b.a': expect.any(Dragonbinder)
+  });
+  expect(store.state).toEqual(expect.objectContaining({
+    b: {
+      hola: 'mundo'
+    },
+    'b.a': {
+      hello: 'world'
+    }
+  }));
+});
+
+test('Trigger listener updating a nested module store', (t) => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      },
+      deleteHello(state) {
+        delete state.hello;
+      }
+    }
+  });
+  let count = 0;
+  let method = () => count++;
+  expect(count).toEqual(0);
+  store.on('set', method);
+  store.on('delete', method);
+  store.commit('my.module.change');
+  store.commit('my.module.deleteHello');
+  expect(count).toEqual(2);
+});
+
+test('Trigger listeners within a child nested module', () => {
+  let moduleA = {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    }
+  };
+
+  let moduleB = {
+    state: {hola: 'mundo'},
+    mutations: {
+      change(state) {
+        state.hola = 'world';
+      }
+    },
+    modules: {
+      a: moduleA
+    }
+  };
+
+  let store = new Dragonbinder({
+    modules: {
+      'my.module': moduleB
+    }
+  });
+
+  let count = 0;
+  let method = () => count++;
+  expect(count).toEqual(0);
+  store.on('set', method);
+  store.commit('my.module.change');
+  store.commit('my.module.a.change');
+  expect(count).toEqual(2);
 });

@@ -1,7 +1,7 @@
 {
   "name": "dragonbinder",
   "version": "2.0.0",
-  "description": "A tiny, less than 1kb, framework agnostic, state managment library inspired by Vuex.",
+  "description": "1kb progressive state management library inspired by Vuex.",
   "main": "dist/dragonbinder.min.js",
   "repository": "git@github.com:Masquerade-Circus/dragonbinder.git",
   "author": "Masquerade Circus <christian@masquerade-circus.net>",
@@ -15,13 +15,14 @@
     "vuex",
     "redux",
     "flux",
-    "manager"
+    "manager",
+    "progresive"
   ],
   "scripts": {
     "dev": "cross-env NODE_ENV=development node rollup.js",
     "build": "cross-env NODE_ENV=production node rollup.js",
     "dev:test": "cross-env NODE_ENV=development ava --watch --verbose",
-    "dev:test:nyc": "cross-env NODE_ENV=development nodemon -w ./tests -w ./lib --exec 'nyc ava --verbose'",
+    "dev:test:nyc": "cross-env NODE_ENV=development nodemon -w ./tests -w ./lib --exec 'nyc --reporter=lcov --reporter=text ava --verbose'",
     "test": "nyc ava",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },

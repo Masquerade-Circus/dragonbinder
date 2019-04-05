@@ -2,7 +2,6 @@
 ![](https://img.shields.io/bundlephobia/min/dragonbinder.svg?style=flat)
 ![](https://img.shields.io/bundlephobia/minzip/dragonbinder.svg?style=flat)
 
-
 [![Build Status](https://travis-ci.org/Masquerade-Circus/dragonbinder.svg?branch=master)](https://travis-ci.org/Masquerade-Circus/dragonbinder)
 [![Dependencies](https://img.shields.io/david/masquerade-circus/dragonbinder.svg?style=flat)](https://david-dm.org/masquerade-circus/dragonbinder)
 ![](https://img.shields.io/github/issues/masquerade-circus/dragonbinder.svg)
@@ -13,22 +12,31 @@
 [![License](https://img.shields.io/github/license/masquerade-circus/dragonbinder.svg)](https://github.com/masquerade-circus/dragonbinder/blob/master/LICENSE)
 
 # Dragonbinder
-A tiny, less than 1kb gzipped, framework agnostic, state managment library inspired by Vuex.
+
+1kb progressive state management library inspired by Vuex.
 
 ## Table of Contents
 
--   [Install](#install)
--   [Features](#features)
--   [Use](#use)
-    -   [State](#state)
-    -   [Getters](#getters)
-    -   [Mutations](#mutations)
-    -   [Actions](#actions)
-    -   [Events](#events)
-    -   [Plugins](#plugins)
--   [Tests](#tests)
--   [Contributing](#contributing)
--   [Legal](#legal)
+- [Dragonbinder](#dragonbinder)
+  - [Table of Contents](#table-of-contents)
+  - [Install](#install)
+  - [Features](#features)
+  - [Use](#use)
+    - [State](#state)
+    - [Getters](#getters)
+    - [Mutations](#mutations)
+    - [Actions](#actions)
+    - [Events](#events)
+      - [Event types](#event-types)
+    - [Nested modules](#nested-modules)
+      - [Module local and global state](#module-local-and-global-state)
+      - [Namespacing](#namespacing)
+    - [Plugins](#plugins)
+      - [Using plugins](#using-plugins)
+      - [Creating plugins](#creating-plugins)
+  - [Development, Build and Tests](#development-build-and-tests)
+  - [Contributing](#contributing)
+  - [Legal](#legal)
 
 ## Install
 
@@ -44,14 +52,15 @@ $ yarn add dragonbinder
 Or you can use it standalone in the browser with: 
 `<script src="https://cdn.jsdelivr.net/npm/dragonbinder"></script>`
 
-## Features 
+## Features
 
 -   [x] Immutable state.
 -   [x] Getters.
 -   [x] Mutations.
 -   [x] Actions.
 -   [x] Event listeners.
--   [x] Plugins
+-   [X] Nested modules.
+-   [x] Plugins.
 
 ## Use
 
@@ -74,6 +83,7 @@ console.log(store.state.count) // -> 1
 ```
 
 ### State
+
 Dragonbinder use Proxies to create a state as a "single source of truth" which cannot be changed unless you commit a mutation. 
 This means that you cannot delete, modify or add a property directly. This allow us to keep track of all changes we made to the state.
 
@@ -108,7 +118,8 @@ store.commit('modifyProperty');
 store.commit('removeProperty');
 ```
 
-### Getters 
+### Getters
+
 As with Vue, with Dragonbinder you can create getters to create computed properties based on the state. 
 This getters will receive the state as first argument and all other getters as second.
 
@@ -141,6 +152,7 @@ console.log(store.getters.completedCount); // -> 1
 ```
 
 ### Mutations
+
 Mutations are the only way to change the state and you must consider the next points when designing mutations.
 
 -   Following the Vuex pattern, mutations must be synchronous.
@@ -176,9 +188,12 @@ store.commit('changeNameOk', 'Jane Doe');
 // You can pass any number of arguments as payload
 store.commit('changeNameTo', 'Jane', 'Doe');
 ```
+
 ### Actions
+
 If you need to handle async functions you must use actions. And actions will always return a promise as result of calling them. 
-```javascript 
+
+```javascript
 const store = new Dragonbinder({
   state: {
     count: 0
@@ -204,9 +219,10 @@ store.dispatch('increment').then(() => console.log(store.state.count)); // -> 1 
 ```
 
 ### Events
+
 You can register/unregister callbacks to events.
 
-```javascript 
+```javascript
 const store = new Dragonbinder({
   state: {
     count: 0
@@ -238,36 +254,81 @@ removeAnonymousListener();
 
 // Committing increment will do nothing as the listeners are already removed
 store.commit('increment'); 
-
 ```
 
 #### Event types
-Event name | Its called when | Params received by place
------------|-----------------|-------
-addlistener | Add an event listener | (1) Store instance  - (2) Event name - (3) Listener added 
-removelistener | Remove an event listener | (1) Store instance - (2) Event name - (3) Listener removed
-set | A property of the state is added or modified | (1) Store instance - (2) The property name - (3) The new value - (4) The old value 
-delete | A property of the state is deleted | (1) Store instance - (2) The property name - (3) The old value 
-beforecommit | Commit method called and before apply the mutation | (1) Store instance - (2) The mutation name - (...n) The arguments passed to the mutation 
-commit | Commit method called and after apply the mutation | (1) Store instance - (2) The mutation name - (...n) The arguments passed to the mutation 
-beforedispatch | Dispatch method called and before apply the action | (1) Store instance - (2) The action name - (...n) The arguments passed to the action
-dispatch | Dispatch method called and after apply the action | (1) Store instance - (2) The action name - (...n) The arguments passed to the action 
-getter | A getter is called | (1) Store instance - (2) The getter name - (3) The value of the getter
-plugin | A plugin is added | (1) Store instance - (2) The plugin added - (...n) The options passed to the plugin
+
+All events receive the store as the first argument
+
+| Event name     | Its called when                                    | Params received by place / (1) Store instance                       |
+| -------------- | -------------------------------------------------- | ------------------------------------------------------------------- |
+| addlistener    | Add an event listener                              | (2) Event name - (3) Listener added                                 |
+| removelistener | Remove an event listener                           | (2) Event name - (3) Listener removed                               |
+| set            | A property of the state is added or modified       | (2) The property name - (3) The new value - (4) The old value       |
+| delete         | A property of the state is deleted                 | (2) The property name - (3) The old value                           |
+| beforecommit   | Commit method called and before apply the mutation | (2) The mutation name - (...n) The arguments passed to the mutation |
+| commit         | Commit method called and after apply the mutation  | (2) The mutation name - (...n) The arguments passed to the mutation |
+| beforedispatch | Dispatch method called and before apply the action | (2) The action name - (...n) The arguments passed to the action     |
+| dispatch       | Dispatch method called and after apply the action  | (2) The action name - (...n) The arguments passed to the action     |
+| getter         | A getter is called                                 | (2) The getter name - (3) The value of the getter                   |
+| plugin         | A plugin is added                                  | (2) The plugin added - (...n) The options passed to the plugin      |
+
+### Nested modules
+Like Vuex, Dragonbinder allows you to divide your store into `modules`. But unlike Vuex, all Dragonbinder modules are namespaced by design. Each module will contain its own store definition including more nested modules.
+
+```javascript 
+const moduleA = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... }
+}
+
+const moduleB = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... }
+  modules: {
+    a: moduleA
+  }
+}
+
+const store = new Dragonbinder({
+  modules: {
+    b: moduleB
+  }
+});
+
+console.log(store.state.b) // -> `moduleB`'s state
+console.log(store.state['b.a']) // -> `moduleA`'s state
+```
+
+#### Module local and global state
+
+-- Pending documentation --
+
+#### Namespacing
+
+-- Pending documentation --
 
 ### Plugins
+
 Dragonbinder comes with a very simple but very powerfull plugin system.
-You can extend its core functionality or change it completly by making use of plugins. 
+You can extend its core functionality or change it completely by making use of plugins. 
 
 #### Using plugins
+
 ```javascript
 let store = new Dragonbinder();
 store.use(myPlugin, ...options);
 ```
 
 #### Creating plugins
+
 A Dragonbinder plugin is a module that exports a single function that will be called
-with the store instance as first argument and optionaly with the passed options if any.
+with the store instance as first argument and optionally with the passed options if any.
+
 ```javascript
 const Dragonbinder = require('dragonbinder');
 const myPlugin = (store, ...options) => {
@@ -285,7 +346,7 @@ const myPlugin = (store, ...options) => {
 };
 ```
 
-## Development, Build and Tests 
+## Development, Build and Tests
 
 Use `yarn dev` to watch and compile the library on every change to it. 
 
