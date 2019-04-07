@@ -15,28 +15,37 @@
 
 1kb progressive state management library inspired by Vuex.
 
+## Features
+
+-   [x] Immutable state.
+-   [x] Getters.
+-   [x] Mutations.
+-   [x] Actions.
+-   [x] Event listeners.
+-   [x] Nested modules.
+-   [x] Plugin system.
+
 ## Table of Contents
 
-- [Dragonbinder](#dragonbinder)
-  - [Table of Contents](#table-of-contents)
-  - [Install](#install)
-  - [Features](#features)
-  - [Use](#use)
-    - [State](#state)
-    - [Getters](#getters)
-    - [Mutations](#mutations)
-    - [Actions](#actions)
-    - [Events](#events)
-      - [Event types](#event-types)
-    - [Nested modules](#nested-modules)
-      - [Module local and global state](#module-local-and-global-state)
-      - [Namespacing](#namespacing)
-    - [Plugins](#plugins)
-      - [Using plugins](#using-plugins)
-      - [Creating plugins](#creating-plugins)
-  - [Development, Build and Tests](#development-build-and-tests)
-  - [Contributing](#contributing)
-  - [Legal](#legal)
+-   [Dragonbinder](#dragonbinder)
+    -   [Features](#features)
+    -   [Table of Contents](#table-of-contents)
+    -   [Install](#install)
+    -   [Use](#use)
+        -   [State](#state)
+        -   [Getters](#getters)
+        -   [Mutations](#mutations)
+        -   [Actions](#actions)
+        -   [Events](#events)
+            -   [Event types](#event-types)
+        -   [Nested modules](#nested-modules)
+            -   [Local and root state](#local-and-root-state)
+        -   [Plugin system](#plugin-system)
+            -   [Using plugins](#using-plugins)
+            -   [Creating plugins](#creating-plugins)
+    -   [Development, Build and Tests](#development-build-and-tests)
+    -   [Contributing](#contributing)
+    -   [Legal](#legal)
 
 ## Install
 
@@ -51,16 +60,6 @@ $ yarn add dragonbinder
 
 Or you can use it standalone in the browser with: 
 `<script src="https://cdn.jsdelivr.net/npm/dragonbinder"></script>`
-
-## Features
-
--   [x] Immutable state.
--   [x] Getters.
--   [x] Mutations.
--   [x] Actions.
--   [x] Event listeners.
--   [X] Nested modules.
--   [x] Plugins.
 
 ## Use
 
@@ -87,7 +86,7 @@ console.log(store.state.count) // -> 1
 Dragonbinder use Proxies to create a state as a "single source of truth" which cannot be changed unless you commit a mutation. 
 This means that you cannot delete, modify or add a property directly. This allow us to keep track of all changes we made to the state.
 
-If you don't provide an initial state by the state property Dragonbinder will create one.
+If you don't provide an initial state by the `state` property Dragonbinder will create one.
 
 ```javascript
 const store = new Dragonbinder({
@@ -118,9 +117,35 @@ store.commit('modifyProperty');
 store.commit('removeProperty');
 ```
 
+Also, if you want to avoid singletons to reuse your initial store definition, you can declare its state as a factory function.
+
+```javascript
+const myStoreDefinition = {
+  state(){
+    return {
+      count: 1
+    }
+  },
+  mutations: {
+    increment(state, payload) {
+      state.count = state.count + payload;
+    }
+  }
+};
+
+const store1 = new Dragonbinder(myStoreDefinition);
+const store2 = new Dragonbinder(myStoreDefinition);
+
+store1.commit('increment', 5);
+store2.commit('increment', 3);
+
+console.log(store1.state.count); // -> 6
+console.log(store2.state.count); // -> 4
+```
+
 ### Getters
 
-As with Vue, with Dragonbinder you can create getters to create computed properties based on the state. 
+As with Vue, with **Dragonbinder** you can create getters to create computed properties based on the state. 
 This getters will receive the state as first argument and all other getters as second.
 
 ```javascript
@@ -156,8 +181,8 @@ console.log(store.getters.completedCount); // -> 1
 Mutations are the only way to change the state and you must consider the next points when designing mutations.
 
 -   Following the Vuex pattern, mutations must be synchronous.
--   Note that with Dragonbinder the state is deep frozen using `Object.freeze` to prevent direct changes. So, when you are changing the state by using a mutation, you can add, modify or delete only fist level properties, second level properties will be read only.
 -   Unlike many other libraries you can pass any number of arguments to a mutation.
+-   With **Dragonbinder** the state is deep frozen using `Object.freeze` to prevent direct changes. So, when you are changing the state by using a mutation, you can add, modify or delete only first level properties, second level properties will be read only.
 
 ```javascript
 const store = new Dragonbinder({
@@ -258,25 +283,28 @@ store.commit('increment');
 
 #### Event types
 
-All events receive the store as the first argument
+All events receive the store instance as the first argument.
 
-| Event name     | Its called when                                    | Params received by place / (1) Store instance                       |
-| -------------- | -------------------------------------------------- | ------------------------------------------------------------------- |
-| addlistener    | Add an event listener                              | (2) Event name - (3) Listener added                                 |
-| removelistener | Remove an event listener                           | (2) Event name - (3) Listener removed                               |
-| set            | A property of the state is added or modified       | (2) The property name - (3) The new value - (4) The old value       |
-| delete         | A property of the state is deleted                 | (2) The property name - (3) The old value                           |
-| beforecommit   | Commit method called and before apply the mutation | (2) The mutation name - (...n) The arguments passed to the mutation |
-| commit         | Commit method called and after apply the mutation  | (2) The mutation name - (...n) The arguments passed to the mutation |
-| beforedispatch | Dispatch method called and before apply the action | (2) The action name - (...n) The arguments passed to the action     |
-| dispatch       | Dispatch method called and after apply the action  | (2) The action name - (...n) The arguments passed to the action     |
-| getter         | A getter is called                                 | (2) The getter name - (3) The value of the getter                   |
-| plugin         | A plugin is added                                  | (2) The plugin added - (...n) The options passed to the plugin      |
+| Event name       | Its called when                                                                          | Arguments received by place                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| addlistener      | An event listener is added                                                               | Event name \| Listener added                                                   |
+| removelistener   | An event listener is removed                                                             | Event name \| Listener removed                                                 |
+| set              | A property of the state is added or modified, also triggered when a module is registered | Property name \| New value \| Old value                                        |
+| delete           | A property of the state is deleted, also triggered when a module is unregistered         | Property name \| Old value                                                     |
+| beforecommit     | Commit method called and before apply the mutation                                       | Mutation name \| (...) Arguments passed to the mutation                        |
+| commit           | Commit method called and after apply the mutation                                        | Mutation name \| (...) Arguments passed to the mutation                        |
+| beforedispatch   | Dispatch method called and before apply the action                                       | Action name \| (...) Arguments passed to the action                            |
+| dispatch         | Dispatch method called and after apply the action                                        | Action name \| (...) Arguments passed to the action                            |
+| getter           | A getter is called                                                                       | Getter name \| Value of the getter                                             |
+| plugin           | A plugin is added                                                                        | Plugin added \| (...) Options passed to the plugin                             |
+| registerModule   | A module is registered                                                                   | Namespace registered \| Module definition \| Store created with the definition |
+| unregisterModule | A module is unregistered                                                                 | Namespace unregistered \| Store created with the definition                    |
 
 ### Nested modules
-Like Vuex, Dragonbinder allows you to divide your store into `modules`. But unlike Vuex, all Dragonbinder modules are namespaced by design. Each module will contain its own store definition including more nested modules.
 
-```javascript 
+Like Vuex, **Dragonbinder** allows you to divide your store into modules and each module can contain its own store definition including more nested modules.
+
+```javascript
 const moduleA = {
   state: { ... },
   mutations: { ... },
@@ -304,17 +332,106 @@ console.log(store.state.b) // -> `moduleB`'s state
 console.log(store.state['b.a']) // -> `moduleA`'s state
 ```
 
-#### Module local and global state
+Also, after the store is created you can register/unregister modules with the `registerModule` and `unregisterModule` methods.
 
--- Pending documentation --
+Consider that when you unregister a module, only its initial nested modules will be unregistered with it.
 
-#### Namespacing
+```javascript
+const moduleA = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... }
+}
 
--- Pending documentation --
+const moduleB = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... },
+  modules: {
+    a: moduleA
+  }
+}
 
-### Plugins
+const moduleC = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... }
+}
 
-Dragonbinder comes with a very simple but very powerfull plugin system.
+const store = new Dragonbinder();
+store.registerModule('b', moduleB);
+store.registerModule('b.c', moduleC);
+
+console.log(store.state.b) // -> `moduleB`'s state
+console.log(store.state['b.a']) // -> `moduleA`'s state
+console.log(store.state['b.c']) // -> `moduleC`'s state
+
+store.unregisterModule('b'); 
+
+console.log(store.state.b) // -> undefined
+console.log(store.state['b.a']) // -> undefined
+console.log(store.state['b.c']) // -> `moduleC`'s state
+```
+
+#### Local and root state
+
+Each module will behave like any other store, but, unlike Vuex, all **Dragonbinder** modules are namespaced by design. There is no option to add root mutations, actions or getters with a module. So, when you call a module mutation, action or getter, you need to supply its full namespace.
+
+The first argument for mutations and getters will continue to be the local state, and with actions the first argument will be the local context/store.
+
+Getters will get the root state and root getters as the third and fourth arguments. 
+
+Actions will access the root context by the `rootStore` property of the local context.
+
+```javascript
+const moduleA = {
+  state: {
+    hello: 'world'
+  },
+  mutations: {
+    sayHello(state, payload){
+      state.hello = payload;
+    }
+  },
+  actions:{
+    change(store, payload){
+      store.commit('sayHello', payload);
+      store.rootStore.commit('increment');
+    }
+  },
+  getters: {
+    hello(state, getters, rootState, rootGetters){
+      return `You have said hello ${rootState.count} times to ${state.hello}`;
+    }
+  }
+};
+
+const store = new Dragonbinder({
+  state: {
+    count: 0
+  },
+  mutations: {
+    increment(state){
+      state.count++;
+    }
+  },
+  modules: {
+    a: moduleA
+  }
+});
+
+store.dispatch('a.change', 'John Doe');
+console.log(store.getters['a.hello']); // -> You have said hello 1 times to John Doe
+console.log(store.state.count) // -> 1
+console.log(store.state.a.hello) // -> John Doe
+```
+
+### Plugin system
+
+**Dragonbinder** comes with a simple but powerfull plugin system.
 You can extend its core functionality or change it completely by making use of plugins. 
 
 #### Using plugins
@@ -326,7 +443,7 @@ store.use(myPlugin, ...options);
 
 #### Creating plugins
 
-A Dragonbinder plugin is a module that exports a single function that will be called
+A **Dragonbinder** plugin is a module that exports a single function that will be called
 with the store instance as first argument and optionally with the passed options if any.
 
 ```javascript
@@ -336,6 +453,7 @@ const myPlugin = (store, ...options) => {
   Dragonbinder.myGlobalMethod = function() {
     // Awesome code here
   };
+  
   Dragonbinder.fn.myPrototypeMethod = function() {
     // Awesome code here
   };

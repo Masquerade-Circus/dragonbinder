@@ -223,7 +223,9 @@ test('Test all listeners', async (t) => {
     'beforedispatch',
     'dispatch',
     'getter',
-    'plugin'
+    'plugin',
+    'registerModule',
+    'unregisterModule'
   ];
   let methods = events.reduce((methods, event) => {
     methods[event] = {
@@ -239,6 +241,9 @@ test('Test all listeners', async (t) => {
   store.commit('deleteB');
   let plugin = () => {};
   store.use(plugin);
+  let module = {};
+  store.registerModule('b', module);
+  store.unregisterModule('b');
   events.forEach(event => store.off(event, methods[event].method));
 
   // Add listener event
@@ -260,8 +265,8 @@ test('Test all listeners', async (t) => {
   ]);
 
 
-  // Set event
-  expect(methods.set.params.length).toEqual(1);
+  // Set event also triggered when you register a module
+  expect(methods.set.params.length).toEqual(2);
   expect(methods.set.params[0]).toEqual([
     expect.any(Dragonbinder), // The store
     'b', // The property name
@@ -269,8 +274,8 @@ test('Test all listeners', async (t) => {
     [1] // The old value
   ]);
 
-  // Delete event
-  expect(methods.delete.params.length).toEqual(1);
+  // Delete event also triggered when you unregister a module
+  expect(methods.delete.params.length).toEqual(2);
   expect(methods.delete.params[0]).toEqual([
     expect.any(Dragonbinder), // The store
     'b', // The property name
@@ -323,6 +328,23 @@ test('Test all listeners', async (t) => {
     expect.any(Dragonbinder), // The store
     plugin // The plugin added
   ]);
+
+  // Register module event
+  expect(methods.registerModule.params.length).toEqual(1);
+  expect(methods.registerModule.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'b', // The namespace registered
+    module, // The module definition
+    expect.any(Dragonbinder) // The store created with the definition
+  ]);
+
+  // Unregister module event
+  expect(methods.unregisterModule.params.length).toEqual(1);
+  expect(methods.unregisterModule.params[0]).toEqual([
+    expect.any(Dragonbinder), // The store
+    'b', // The namespace unregistered
+    expect.any(Dragonbinder) // The store created with the definition
+  ]);
 });
 
 test('Register nested modules', () => {
@@ -346,6 +368,23 @@ test('Register nested modules', () => {
   }));
 });
 
+test('Throw an error if you want to overwrite a registered module', () => {
+  let store = getNewStore();
+  let myModule = {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    }
+  };
+
+  store.registerModule('my.module', myModule);
+
+  expect(() => store.registerModule('my.module', myModule))
+    .toThrowError('A module with the namespace "my.module" is already registered.');
+});
+
 test('Unregister nested modules', () => {
   let store = getNewStore();
   store.registerModule('my.module', {
@@ -366,6 +405,33 @@ test('Unregister nested modules', () => {
     }
   }));
 
+  store.unregisterModule('my.module');
+
+  expect(store.init.modules).toEqual({});
+  expect(store.state['my.module']).toBeUndefined();
+});
+
+test('Fail silently if you try to unregister a nested module twice', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    }
+  });
+
+  expect(store.init.modules).toEqual({
+    'my.module': expect.any(Dragonbinder)
+  });
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'world'
+    }
+  }));
+
+  store.unregisterModule('my.module');
   store.unregisterModule('my.module');
 
   expect(store.init.modules).toEqual({});
@@ -719,7 +785,7 @@ test('Trigger listener updating a nested module store', (t) => {
   expect(count).toEqual(2);
 });
 
-test('Trigger listeners within a child nested module', () => {
+test('Trigger listeners within a child nested module', (t) => {
   let moduleA = {
     state: {hello: 'world'},
     mutations: {
@@ -754,4 +820,98 @@ test('Trigger listeners within a child nested module', () => {
   store.commit('my.module.change');
   store.commit('my.module.a.change');
   expect(count).toEqual(2);
+});
+
+test('Declare state as factory function', (t) => {
+  const myModule = {
+    state() {
+      return {
+        count: 1
+      };
+    },
+    mutations: {
+      increment(state, payload) {
+        state.count = state.count + payload;
+      }
+    }
+  };
+
+  const store1 = new Dragonbinder(myModule);
+  const store2 = new Dragonbinder(myModule);
+
+  store1.commit('increment', 5);
+  store2.commit('increment', 3);
+
+  expect(store1.state.count).toEqual(6);
+  expect(store2.state.count).toEqual(4);
+});
+
+test('Register nested modules with child nested module property', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    modules: {
+      child: {
+        state: {
+          count: 1
+        }
+      }
+    }
+  });
+
+  expect(store.init.modules).toEqual({
+    'my.module': expect.any(Dragonbinder),
+    'my.module.child': expect.any(Dragonbinder)
+  });
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'world'
+    },
+    'my.module.child': {
+      count: 1
+    }
+  }));
+});
+
+test('Unregister nested modules with child nested module', () => {
+  let store = getNewStore();
+  store.registerModule('my.module', {
+    state: {hello: 'world'},
+    mutations: {
+      change(state) {
+        state.hello = 'mundo';
+      }
+    },
+    modules: {
+      child: {
+        state: {
+          count: 1
+        }
+      }
+    }
+  });
+
+  expect(store.init.modules).toEqual({
+    'my.module': expect.any(Dragonbinder),
+    'my.module.child': expect.any(Dragonbinder)
+  });
+  expect(store.state).toEqual(expect.objectContaining({
+    'my.module': {
+      hello: 'world'
+    },
+    'my.module.child': {
+      count: 1
+    }
+  }));
+
+  store.unregisterModule('my.module');
+
+  expect(store.init.modules).toEqual({});
+  expect(store.state['my.module']).toBeUndefined();
+  expect(store.state['my.module.child']).toBeUndefined();
 });
