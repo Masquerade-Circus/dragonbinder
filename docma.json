@@ -3,12 +3,12 @@
   "dest": "./docs",
   "jsdoc": {
     "package": true,
-    "access": "all",
-    "hierarchy": false
+    "access": "all"
   },
   "app": {
     "entrance": "content:readme",
-    "server": "github"
+    "server": "github",
+    "base": "/docs"
   },
   "template": {
     "path": "zebra",

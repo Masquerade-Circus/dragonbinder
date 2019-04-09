@@ -27,7 +27,7 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "docs": "docma -c docma.json",
     "docs:watch": "nodemon -w ./lib -w ./*.md --exec 'yarn docs'",
-    "docs:serve": "docma serve docs"
+    "docs:serve": "docma serve"
   },
   "devDependencies": {
     "ava": "^1.4.1",
