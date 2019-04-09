@@ -17,35 +17,35 @@
 
 ## Features
 
--   [x] Immutable state.
--   [x] Getters.
--   [x] Mutations.
--   [x] Actions.
--   [x] Event listeners.
--   [x] Nested modules.
--   [x] Plugin system.
+- [x] Immutable state.
+- [x] Getters.
+- [x] Mutations.
+- [x] Actions.
+- [x] Event listeners.
+- [x] Nested modules.
+- [x] Plugin system.
 
 ## Table of Contents
 
--   [Dragonbinder](#dragonbinder)
-    -   [Features](#features)
-    -   [Table of Contents](#table-of-contents)
-    -   [Install](#install)
-    -   [Use](#use)
-        -   [State](#state)
-        -   [Getters](#getters)
-        -   [Mutations](#mutations)
-        -   [Actions](#actions)
-        -   [Events](#events)
-            -   [Event types](#event-types)
-        -   [Nested modules](#nested-modules)
-            -   [Local and root state](#local-and-root-state)
-        -   [Plugin system](#plugin-system)
-            -   [Using plugins](#using-plugins)
-            -   [Creating plugins](#creating-plugins)
-    -   [Development, Build and Tests](#development-build-and-tests)
-    -   [Contributing](#contributing)
-    -   [Legal](#legal)
+- [Dragonbinder](#dragonbinder)
+  - [Features](#features)
+  - [Table of Contents](#table-of-contents)
+  - [Install](#install)
+  - [Use](#use)
+    - [State](#state)
+    - [Getters](#getters)
+    - [Mutations](#mutations)
+    - [Actions](#actions)
+    - [Events](#events)
+      - [Event types](#event-types)
+    - [Nested modules](#nested-modules)
+      - [Local and root state](#local-and-root-state)
+    - [Plugin system](#plugin-system)
+      - [Using plugins](#using-plugins)
+      - [Creating plugins](#creating-plugins)
+  - [Development, Build and Tests](#development-build-and-tests)
+  - [Contributing](#contributing)
+  - [Legal](#legal)
 
 ## Install
 
@@ -83,10 +83,10 @@ console.log(store.state.count) // -> 1
 
 ### State
 
-Dragonbinder use Proxies to create a state as a "single source of truth" which cannot be changed unless you commit a mutation. 
+**Dragonbinder** use Proxies to create a state as a "single source of truth" which cannot be changed unless you commit a mutation. 
 This means that you cannot delete, modify or add a property directly. This allow us to keep track of all changes we made to the state.
 
-If you don't provide an initial state by the `state` property Dragonbinder will create one.
+If you don't provide an initial state by the `state` property **Dragonbinder** will create one.
 
 ```javascript
 const store = new Dragonbinder({
@@ -180,9 +180,9 @@ console.log(store.getters.completedCount); // -> 1
 
 Mutations are the only way to change the state and you must consider the next points when designing mutations.
 
--   Following the Vuex pattern, mutations must be synchronous.
--   Unlike many other libraries you can pass any number of arguments to a mutation.
--   With **Dragonbinder** the state is deep frozen using `Object.freeze` to prevent direct changes. So, when you are changing the state by using a mutation, you can add, modify or delete only first level properties, second level properties will be read only.
+- Following the Vuex pattern, mutations must be synchronous.
+- Unlike many other libraries you can pass any number of arguments to a mutation.
+- With **Dragonbinder** the state is deep frozen using `Object.freeze` to prevent direct changes. So, when you are changing the state by using a mutation, you can add, modify or delete only first level properties, second level properties will be read only.
 
 ```javascript
 const store = new Dragonbinder({
@@ -476,11 +476,17 @@ Use `yarn dev:test` to run the tests watching changes to library and tests.
 
 Use `yarn dev:test:nyc` to run the tests watching changes and get the test coverage at last.
 
+Use `yarn docs` to build the documentation. 
+
+Use `yarn docs:watch` to watch and rebuild the documentation on every change to the library or the md files.
+
+Use `yarn docs:serve` to see the generated documentation locally. 
+
 ## Contributing
 
--   Use prettify and eslint to lint your code.
--   Add tests for any new or changed functionality.
--   Update the readme with an example if you add or change any functionality.
+- Use prettify and eslint to lint your code.
+- Add tests for any new or changed functionality.
+- Update the readme with an example if you add or change any functionality.
 
 ## Legal
 

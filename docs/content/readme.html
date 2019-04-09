@@ -1,0 +1,483 @@
+
+<html><head></head><body><p><a href="https://npmjs.org/package/dragonbinder" title="View this project on npm"><img src="https://img.shields.io/npm/v/dragonbinder.svg?style=flat" alt="npm version" style="max-width: 100%;"></a>
+<img src="https://img.shields.io/bundlephobia/min/dragonbinder.svg?style=flat" alt="" style="max-width: 100%;">
+<img src="https://img.shields.io/bundlephobia/minzip/dragonbinder.svg?style=flat" alt="" style="max-width: 100%;"></p>
+<p><a href="https://travis-ci.org/Masquerade-Circus/dragonbinder"><img src="https://travis-ci.org/Masquerade-Circus/dragonbinder.svg?branch=master" alt="Build Status" style="max-width: 100%;"></a>
+<a href="https://david-dm.org/masquerade-circus/dragonbinder"><img src="https://img.shields.io/david/masquerade-circus/dragonbinder.svg?style=flat" alt="Dependencies" style="max-width: 100%;"></a>
+<img src="https://img.shields.io/github/issues/masquerade-circus/dragonbinder.svg" alt="" style="max-width: 100%;">
+<img src="https://img.shields.io/snyk/vulnerabilities/npm/dragonbinder.svg" alt="" style="max-width: 100%;">
+<a href="https://www.codacy.com/app/Masquerade-Circus/dragonbinder?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Masquerade-Circus/dragonbinder&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/521f72fc6d61426783692b62d64a3643" alt="Codacy Badge" style="max-width: 100%;"></a>
+<a href="https://codeclimate.com/github/Masquerade-Circus/dragonbinder/maintainability"><img src="https://api.codeclimate.com/v1/badges/c1263dd7fb4f90194625/maintainability" alt="Maintainability" style="max-width: 100%;"></a>
+<a href="https://coveralls.io/github/Masquerade-Circus/dragonbinder?branch=master"><img src="https://coveralls.io/repos/github/Masquerade-Circus/dragonbinder/badge.svg?branch=master" alt="Coverage Status" style="max-width: 100%;"></a>
+<a href="https://github.com/masquerade-circus/dragonbinder/blob/master/LICENSE"><img src="https://img.shields.io/github/license/masquerade-circus/dragonbinder.svg" alt="License" style="max-width: 100%;"></a></p>
+<h1 id="dragonbinder">Dragonbinder</h1>
+<hr />
+<p>1kb progressive state management library inspired by Vuex.</p>
+<h2 id="features">Features</h2>
+<hr />
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Immutable state.</li>
+<li><input checked="" disabled="" type="checkbox"> Getters.</li>
+<li><input checked="" disabled="" type="checkbox"> Mutations.</li>
+<li><input checked="" disabled="" type="checkbox"> Actions.</li>
+<li><input checked="" disabled="" type="checkbox"> Event listeners.</li>
+<li><input checked="" disabled="" type="checkbox"> Nested modules.</li>
+<li><input checked="" disabled="" type="checkbox"> Plugin system.</li>
+</ul>
+<h2 id="table-of-contents">Table of Contents</h2>
+<hr />
+<ul>
+<li><a href="#dragonbinder">Dragonbinder</a><ul>
+<li><a href="#features">Features</a></li>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+<li><a href="#install">Install</a></li>
+<li><a href="#use">Use</a><ul>
+<li><a href="#state">State</a></li>
+<li><a href="#getters">Getters</a></li>
+<li><a href="#mutations">Mutations</a></li>
+<li><a href="#actions">Actions</a></li>
+<li><a href="#events">Events</a><ul>
+<li><a href="#event-types">Event types</a></li>
+</ul>
+</li>
+<li><a href="#nested-modules">Nested modules</a><ul>
+<li><a href="#local-and-root-state">Local and root state</a></li>
+</ul>
+</li>
+<li><a href="#plugin-system">Plugin system</a><ul>
+<li><a href="#using-plugins">Using plugins</a></li>
+<li><a href="#creating-plugins">Creating plugins</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#development-build-and-tests">Development, Build and Tests</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#legal">Legal</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="install">Install</h2>
+<hr />
+<p>You can get this library as a <a href="https://nodejs.org/en/">Node.js</a> module available through the <a href="https://www.npmjs.com/">npm registry</a>:</p>
+<pre><code class="bash">// With npm
+$ npm install dragonbinder
+// With yarn
+$ yarn add dragonbinder</code></pre>
+<p>Or you can use it standalone in the browser with: 
+<code>&lt;script src="https://cdn.jsdelivr.net/npm/dragonbinder"&gt;&lt;/script&gt;</code></p>
+<h2 id="use">Use</h2>
+<hr />
+<pre><code class="javascript">const Dragonbinder = require('dragonbinder');
+
+const store = new Dragonbinder({
+  state: {
+    count: 0
+  },
+  mutations: {
+    increment(state) {
+      state.count++
+    }
+  }
+});
+
+store.commit('increment');
+console.log(store.state.count) // -&gt; 1</code></pre>
+<h3 id="state">State</h3>
+<p><strong>Dragonbinder</strong> use Proxies to create a state as a "single source of truth" which cannot be changed unless you commit a mutation. 
+This means that you cannot delete, modify or add a property directly. This allow us to keep track of all changes we made to the state.</p>
+<p>If you don't provide an initial state by the <code>state</code> property <strong>Dragonbinder</strong> will create one.</p>
+<pre><code class="javascript">const store = new Dragonbinder({
+  state: {
+    count: 0
+  },
+  mutations: {
+    addProperty(state, value) {
+      state.hello = 'world';
+    },
+    modifyProperty(state) {
+      state.count++
+    },
+    removeProperty(state) {
+      delete state.count;
+    }
+  }
+});
+
+// This will throw errors
+store.state.hello = 'world';
+store.state.count++;
+delete state.count;
+
+// This will work as expected
+store.commit('addProperty');
+store.commit('modifyProperty');
+store.commit('removeProperty');</code></pre>
+<p>Also, if you want to avoid singletons to reuse your initial store definition, you can declare its state as a factory function.</p>
+<pre><code class="javascript">const myStoreDefinition = {
+  state(){
+    return {
+      count: 1
+    }
+  },
+  mutations: {
+    increment(state, payload) {
+      state.count = state.count + payload;
+    }
+  }
+};
+
+const store1 = new Dragonbinder(myStoreDefinition);
+const store2 = new Dragonbinder(myStoreDefinition);
+
+store1.commit('increment', 5);
+store2.commit('increment', 3);
+
+console.log(store1.state.count); // -&gt; 6
+console.log(store2.state.count); // -&gt; 4</code></pre>
+<h3 id="getters">Getters</h3>
+<p>As with Vue, with <strong>Dragonbinder</strong> you can create getters to create computed properties based on the state. 
+This getters will receive the state as first argument and all other getters as second.</p>
+<pre><code class="javascript">const store = new Dragonbinder({
+  state: {
+    todos: [
+      {
+        content: 'First',
+        completed: false
+      }, 
+      {
+        content: 'Second',
+        completed: true
+      }
+    ]
+  },
+  getters: {
+    completed(state){
+      return state.todos.filter(item =&gt; item.completed);
+    },
+    completedCount(state, getters){
+      return getters.completed.length;
+    }
+  }
+});
+
+console.log(store.getters.completed); // -&gt; { content: 'Second', completed: true }
+console.log(store.getters.completedCount); // -&gt; 1</code></pre>
+<h3 id="mutations">Mutations</h3>
+<p>Mutations are the only way to change the state and you must consider the next points when designing mutations.</p>
+<ul>
+<li>Following the Vuex pattern, mutations must be synchronous.</li>
+<li>Unlike many other libraries you can pass any number of arguments to a mutation.</li>
+<li>With <strong>Dragonbinder</strong> the state is deep frozen using <code>Object.freeze</code> to prevent direct changes. So, when you are changing the state by using a mutation, you can add, modify or delete only first level properties, second level properties will be read only.</li>
+</ul>
+<pre><code class="javascript">const store = new Dragonbinder({
+  state: {
+    hello: {
+      name: 'John Doe'
+    }
+  },
+  mutations: {
+    changeNameError(state, payload){
+      state.hello.name = payload;
+    },
+    changeNameOk(state, payload){
+      state.hello = {...state.hello, name: payload};
+    },
+    changeNameTo(state, ...args){
+      state.hello = {...state.hello, name: args.join(' ')};
+    }
+  }
+});
+
+// This will throw an assign to read only property error
+store.commit('changeNameError', 'Jane Doe');
+
+// This will work as expected
+store.commit('changeNameOk', 'Jane Doe');
+
+// You can pass any number of arguments as payload
+store.commit('changeNameTo', 'Jane', 'Doe');</code></pre>
+<h3 id="actions">Actions</h3>
+<p>If you need to handle async functions you must use actions. And actions will always return a promise as result of calling them. </p>
+<pre><code class="javascript">const store = new Dragonbinder({
+  state: {
+    count: 0
+  },
+  mutations: {
+    increment(state) {
+      state.count++
+    }
+  },
+  actions: {
+    increment(state){
+      return new Promise((resolve) =&gt; {
+        setTimeout(() =&gt; {
+          store.commit('increment');
+          resolve();
+        }, 1000);
+      })
+    }
+  }
+});
+
+store.dispatch('increment').then(() =&gt; console.log(store.state.count)); // -&gt; 1 after one second</code></pre>
+<h3 id="events">Events</h3>
+<p>You can register/unregister callbacks to events.</p>
+<pre><code class="javascript">const store = new Dragonbinder({
+  state: {
+    count: 0
+  },
+  mutations: {
+    increment(state) {
+      state.count++
+    }
+  }
+});
+
+// Add a named listener
+let namedListener = (store, prop, newVal, oldVal) =&gt; console.log(`The property ${prop} was changed from ${oldVal} to ${newVal}`);
+store.on('set', namedListener);
+
+// Add an anonymous listener
+let removeAnonymousListener = store.on('set', () =&gt; console.log('Anonymous listener triggered'));
+
+// Committing increment will trigger the listener
+store.commit('increment');
+// $ The property count was changed from 0 to 1
+// $ Anonymous listener triggered
+
+// Remove a named listener 
+store.off('set', namedListener);
+
+// Remove an anonyous listener 
+removeAnonymousListener();
+
+// Committing increment will do nothing as the listeners are already removed
+store.commit('increment'); </code></pre>
+<h4 id="event-types">Event types</h4>
+<p>All events receive the store instance as the first argument.</p>
+<table>
+<thead>
+<tr>
+<th>Event name</th>
+<th>Its called when</th>
+<th>Arguments received by place</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>addlistener</td>
+<td>An event listener is added</td>
+<td>Event name | Listener added</td>
+</tr>
+<tr>
+<td>removelistener</td>
+<td>An event listener is removed</td>
+<td>Event name | Listener removed</td>
+</tr>
+<tr>
+<td>set</td>
+<td>A property of the state is added or modified, also triggered when a module is registered</td>
+<td>Property name | New value | Old value</td>
+</tr>
+<tr>
+<td>delete</td>
+<td>A property of the state is deleted, also triggered when a module is unregistered</td>
+<td>Property name | Old value</td>
+</tr>
+<tr>
+<td>beforecommit</td>
+<td>Commit method called and before apply the mutation</td>
+<td>Mutation name | (...) Arguments passed to the mutation</td>
+</tr>
+<tr>
+<td>commit</td>
+<td>Commit method called and after apply the mutation</td>
+<td>Mutation name | (...) Arguments passed to the mutation</td>
+</tr>
+<tr>
+<td>beforedispatch</td>
+<td>Dispatch method called and before apply the action</td>
+<td>Action name | (...) Arguments passed to the action</td>
+</tr>
+<tr>
+<td>dispatch</td>
+<td>Dispatch method called and after apply the action</td>
+<td>Action name | (...) Arguments passed to the action</td>
+</tr>
+<tr>
+<td>getter</td>
+<td>A getter is called</td>
+<td>Getter name | Value of the getter</td>
+</tr>
+<tr>
+<td>plugin</td>
+<td>A plugin is added</td>
+<td>Plugin added | (...) Options passed to the plugin</td>
+</tr>
+<tr>
+<td>registerModule</td>
+<td>A module is registered</td>
+<td>Namespace registered | Module definition | Store created with the definition</td>
+</tr>
+<tr>
+<td>unregisterModule</td>
+<td>A module is unregistered</td>
+<td>Namespace unregistered | Store created with the definition</td>
+</tr>
+</tbody></table>
+<h3 id="nested-modules">Nested modules</h3>
+<p>Like Vuex, <strong>Dragonbinder</strong> allows you to divide your store into modules and each module can contain its own store definition including more nested modules.</p>
+<pre><code class="javascript">const moduleA = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... }
+}
+
+const moduleB = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... }
+  modules: {
+    a: moduleA
+  }
+}
+
+const store = new Dragonbinder({
+  modules: {
+    b: moduleB
+  }
+});
+
+console.log(store.state.b) // -&gt; `moduleB`'s state
+console.log(store.state['b.a']) // -&gt; `moduleA`'s state</code></pre>
+<p>Also, after the store is created you can register/unregister modules with the <code>registerModule</code> and <code>unregisterModule</code> methods.</p>
+<p>Consider that when you unregister a module, only its initial nested modules will be unregistered with it.</p>
+<pre><code class="javascript">const moduleA = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... }
+}
+
+const moduleB = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... },
+  modules: {
+    a: moduleA
+  }
+}
+
+const moduleC = {
+  state: { ... },
+  mutations: { ... },
+  actions: { ... },
+  getters: { ... }
+}
+
+const store = new Dragonbinder();
+store.registerModule('b', moduleB);
+store.registerModule('b.c', moduleC);
+
+console.log(store.state.b) // -&gt; `moduleB`'s state
+console.log(store.state['b.a']) // -&gt; `moduleA`'s state
+console.log(store.state['b.c']) // -&gt; `moduleC`'s state
+
+store.unregisterModule('b'); 
+
+console.log(store.state.b) // -&gt; undefined
+console.log(store.state['b.a']) // -&gt; undefined
+console.log(store.state['b.c']) // -&gt; `moduleC`'s state</code></pre>
+<h4 id="local-and-root-state">Local and root state</h4>
+<p>Each module will behave like any other store, but, unlike Vuex, all <strong>Dragonbinder</strong> modules are namespaced by design. There is no option to add root mutations, actions or getters with a module. So, when you call a module mutation, action or getter, you need to supply its full namespace.</p>
+<p>The first argument for mutations and getters will continue to be the local state, and with actions the first argument will be the local context/store.</p>
+<p>Getters will get the root state and root getters as the third and fourth arguments. </p>
+<p>Actions will access the root context by the <code>rootStore</code> property of the local context.</p>
+<pre><code class="javascript">const moduleA = {
+  state: {
+    hello: 'world'
+  },
+  mutations: {
+    sayHello(state, payload){
+      state.hello = payload;
+    }
+  },
+  actions:{
+    change(store, payload){
+      store.commit('sayHello', payload);
+      store.rootStore.commit('increment');
+    }
+  },
+  getters: {
+    hello(state, getters, rootState, rootGetters){
+      return `You have said hello ${rootState.count} times to ${state.hello}`;
+    }
+  }
+};
+
+const store = new Dragonbinder({
+  state: {
+    count: 0
+  },
+  mutations: {
+    increment(state){
+      state.count++;
+    }
+  },
+  modules: {
+    a: moduleA
+  }
+});
+
+store.dispatch('a.change', 'John Doe');
+console.log(store.getters['a.hello']); // -&gt; You have said hello 1 times to John Doe
+console.log(store.state.count) // -&gt; 1
+console.log(store.state.a.hello) // -&gt; John Doe</code></pre>
+<h3 id="plugin-system">Plugin system</h3>
+<p><strong>Dragonbinder</strong> comes with a simple but powerfull plugin system.
+You can extend its core functionality or change it completely by making use of plugins. </p>
+<h4 id="using-plugins">Using plugins</h4>
+<pre><code class="javascript">let store = new Dragonbinder();
+store.use(myPlugin, ...options);</code></pre>
+<h4 id="creating-plugins">Creating plugins</h4>
+<p>A <strong>Dragonbinder</strong> plugin is a module that exports a single function that will be called
+with the store instance as first argument and optionally with the passed options if any.</p>
+<pre><code class="javascript">const Dragonbinder = require('dragonbinder');
+const myPlugin = (store, ...options) =&gt; {
+
+  Dragonbinder.myGlobalMethod = function() {
+    // Awesome code here
+  };
+
+  Dragonbinder.fn.myPrototypeMethod = function() {
+    // Awesome code here
+  };
+
+  store.myLocalMethod = function() {
+    // Awesome code here
+  };
+};</code></pre>
+<h2 id="development-build-and-tests">Development, Build and Tests</h2>
+<hr />
+<p>Use <code>yarn dev</code> to watch and compile the library on every change to it. </p>
+<p>Use <code>yarn build</code> to build the library. </p>
+<p>Use <code>yarn test</code> to run tests only once.</p>
+<p>Use <code>yarn dev:test</code> to run the tests watching changes to library and tests.</p>
+<p>Use <code>yarn dev:test:nyc</code> to run the tests watching changes and get the test coverage at last.</p>
+<p>Use <code>yarn docs</code> to build the documentation. </p>
+<p>Use <code>yarn docs:watch</code> to watch and rebuild the documentation on every change to the library or the md files.</p>
+<p>Use <code>yarn docs:serve</code> to see the generated documentation locally. </p>
+<h2 id="contributing">Contributing</h2>
+<hr />
+<ul>
+<li>Use prettify and eslint to lint your code.</li>
+<li>Add tests for any new or changed functionality.</li>
+<li>Update the readme with an example if you add or change any functionality.</li>
+</ul>
+<h2 id="legal">Legal</h2>
+<hr />
+<p>Author: <a href="http://masquerade-circus.net">Masquerade Circus</a>. License <a href="https://opensource.org/licenses/Apache-2.0">Apache-2.0</a></p>
+</body></html>
