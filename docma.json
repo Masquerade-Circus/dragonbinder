@@ -8,7 +8,7 @@
   "app": {
     "entrance": "content:readme",
     "server": "github",
-    "base": "/docs"
+    "base": "/dragonbinder"
   },
   "template": {
     "path": "zebra",
