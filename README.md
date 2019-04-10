@@ -17,35 +17,36 @@
 
 ## Features
 
-- [x] Immutable state.
-- [x] Getters.
-- [x] Mutations.
-- [x] Actions.
-- [x] Event listeners.
-- [x] Nested modules.
-- [x] Plugin system.
+-   [x] Immutable state.
+-   [x] Getters.
+-   [x] Mutations.
+-   [x] Actions.
+-   [x] Event listeners.
+-   [x] Nested modules.
+-   [x] Plugin system.
 
 ## Table of Contents
 
-- [Dragonbinder](#dragonbinder)
-  - [Features](#features)
-  - [Table of Contents](#table-of-contents)
-  - [Install](#install)
-  - [Use](#use)
-    - [State](#state)
-    - [Getters](#getters)
-    - [Mutations](#mutations)
-    - [Actions](#actions)
-    - [Events](#events)
-      - [Event types](#event-types)
-    - [Nested modules](#nested-modules)
-      - [Local and root state](#local-and-root-state)
-    - [Plugin system](#plugin-system)
-      - [Using plugins](#using-plugins)
-      - [Creating plugins](#creating-plugins)
-  - [Development, Build and Tests](#development-build-and-tests)
-  - [Contributing](#contributing)
-  - [Legal](#legal)
+-   [Dragonbinder](#dragonbinder)
+    -   [Features](#features)
+    -   [Table of Contents](#table-of-contents)
+    -   [Install](#install)
+    -   [Use](#use)
+        -   [State](#state)
+        -   [Getters](#getters)
+        -   [Mutations](#mutations)
+        -   [Actions](#actions)
+        -   [Events](#events)
+            -   [Event types](#event-types)
+        -   [Nested modules](#nested-modules)
+            -   [Local and root state](#local-and-root-state)
+        -   [Plugin system](#plugin-system)
+            -   [Using plugins](#using-plugins)
+            -   [Creating plugins](#creating-plugins)
+    -   [API](#api)
+    -   [Development, Build and Tests](#development-build-and-tests)
+    -   [Contributing](#contributing)
+    -   [Legal](#legal)
 
 ## Install
 
@@ -180,9 +181,9 @@ console.log(store.getters.completedCount); // -> 1
 
 Mutations are the only way to change the state and you must consider the next points when designing mutations.
 
-- Following the Vuex pattern, mutations must be synchronous.
-- Unlike many other libraries you can pass any number of arguments to a mutation.
-- With **Dragonbinder** the state is deep frozen using `Object.freeze` to prevent direct changes. So, when you are changing the state by using a mutation, you can add, modify or delete only first level properties, second level properties will be read only.
+-   Following the Vuex pattern, mutations must be synchronous.
+-   Unlike many other libraries you can pass any number of arguments to a mutation.
+-   With **Dragonbinder** the state is deep frozen using `Object.freeze` to prevent direct changes. So, when you are changing the state by using a mutation, you can add, modify or delete only first level properties, second level properties will be read only.
 
 ```javascript
 const store = new Dragonbinder({
@@ -464,6 +465,10 @@ const myPlugin = (store, ...options) => {
 };
 ```
 
+## API
+
+Check the docs at: [https://masquerade-circus.github.io/dragonbinder](https://masquerade-circus.github.io/dragonbinder/?api)
+
 ## Development, Build and Tests
 
 Use `yarn dev` to watch and compile the library on every change to it. 
@@ -484,9 +489,10 @@ Use `yarn docs:serve` to see the generated documentation locally.
 
 ## Contributing
 
-- Use prettify and eslint to lint your code.
-- Add tests for any new or changed functionality.
-- Update the readme with an example if you add or change any functionality.
+-   Use prettify and eslint to lint your code.
+-   Add tests for any new or changed functionality.
+-   Update the readme with an example if you add or change any functionality.
+-   Use [remark](https://www.npmjs.com/package/remark) to format md files and rebuild docs before commit.
 
 ## Legal
 
