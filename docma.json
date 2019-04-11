@@ -1,5 +1,5 @@
 {
-  "src": ["./lib/index.js", "./README.md"],
+  "src": ["./lib/index.js", "./README.md", "./CONTRIBUTING.md"],
   "dest": "./docs",
   "jsdoc": {
     "package": true,
@@ -49,6 +49,11 @@
             "label": "API",
             "iconClass": "fas fa-book",
             "href": "./?api"
+          },
+          {
+            "label": "Contributing",
+            "iconClass": "fas fa-code-branch",
+            "href": "./?content=contributing"
           },
           {
             "label": "NPM",

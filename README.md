@@ -42,10 +42,10 @@
             -   [Local and root state](#local-and-root-state)
         -   [Plugin system](#plugin-system)
             -   [Using plugins](#using-plugins)
-            -   [Creating plugins](#creating-plugins)
+            -   [Developing plugins](#developing-plugins)
     -   [API](#api)
-    -   [Development, Build and Tests](#development-build-and-tests)
     -   [Contributing](#contributing)
+    -   [Development, Build and Tests](#development-build-and-tests)
     -   [Legal](#legal)
 
 ## Install
@@ -442,7 +442,7 @@ let store = new Dragonbinder();
 store.use(myPlugin, ...options);
 ```
 
-#### Creating plugins
+#### Developing plugins
 
 A **Dragonbinder** plugin is a module that exports a single function that will be called
 with the store instance as first argument and optionally with the passed options if any.
@@ -467,32 +467,22 @@ const myPlugin = (store, ...options) => {
 
 ## API
 
-Check the docs at: [https://masquerade-circus.github.io/dragonbinder](https://masquerade-circus.github.io/dragonbinder/?api)
-
-## Development, Build and Tests
-
-Use `yarn dev` to watch and compile the library on every change to it. 
-
-Use `yarn build` to build the library. 
-
-Use `yarn test` to run tests only once.
-
-Use `yarn dev:test` to run the tests watching changes to library and tests.
-
-Use `yarn dev:test:nyc` to run the tests watching changes and get the test coverage at last.
-
-Use `yarn docs` to build the documentation. 
-
-Use `yarn docs:watch` to watch and rebuild the documentation on every change to the library or the md files.
-
-Use `yarn docs:serve` to see the generated documentation locally. 
+Check the docs at: <https://masquerade-circus.github.io/dragonbinder/?api>
 
 ## Contributing
 
--   Use prettify and eslint to lint your code.
--   Add tests for any new or changed functionality.
--   Update the readme with an example if you add or change any functionality.
--   Use [remark](https://www.npmjs.com/package/remark) to format md files and rebuild docs before commit.
+Check the contributing guide at: <https://masquerade-circus.github.io/dragonbinder/?content=contributing>
+
+## Development, Build and Tests
+
+-   Use `yarn dev` to watch and compile the library on every change to it. 
+-   Use `yarn build` to build the library. 
+-   Use `yarn test` to run tests only once.
+-   Use `yarn dev:test` to run the tests watching changes to library and tests.
+-   Use `yarn dev:test:nyc` to run the tests watching changes and get the test coverage at last.
+-   Use `yarn docs` to build the documentation. 
+-   Use `yarn docs:watch` to watch and rebuild the documentation on every change to the library or the md files.
+-   Use `yarn docs:serve` to see the generated documentation locally. 
 
 ## Legal
 

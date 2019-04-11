@@ -26,7 +26,7 @@
     "test": "nyc ava",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "docs": "docma -c docma.json",
-    "docs:watch": "nodemon -w ./lib -w ./*.md --exec 'yarn docs'",
+    "docs:watch": "nodemon -w ./lib -w ./*.md -w ./docma.json --exec 'yarn docs'",
     "docs:serve": "docma serve"
   },
   "devDependencies": {

@@ -1,0 +1,70 @@
+
+<html><head></head><body><h1 id="contributing-guide">Contributing Guide</h1>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<hr />
+<ul>
+<li><a href="#contributing-guide">Contributing Guide</a><ul>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+<li><a href="#ways-to-contribute">Ways to contribute</a><ul>
+<li><a href="#call-for-contributors">Call for contributors</a></li>
+<li><a href="#submit-feedback">Submit Feedback</a></li>
+<li><a href="#fix-bugs">Fix Bugs</a></li>
+<li><a href="#implement-features">Implement Features</a></li>
+<li><a href="#write-documentation">Write Documentation</a></li>
+<li><a href="#develop-a-plugin">Develop a plugin</a></li>
+</ul>
+</li>
+<li><a href="#pull-request-guide">Pull Request Guide</a></li>
+<li><a href="#code-style-guide">Code Style Guide</a></li>
+<li><a href="#documentation-guide">Documentation Guide</a></li>
+<li><a href="#testing-guide">Testing Guide</a></li>
+<li><a href="#attribution">Attribution</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="ways-to-contribute">Ways to contribute</h2>
+<hr />
+<h3 id="call-for-contributors">Call for contributors</h3>
+<p>You can follow the tag of <code>call for contributors</code> in the issues. The pull requests solving these issues are most likely to be merged.</p>
+<h3 id="submit-feedback">Submit Feedback</h3>
+<p>The feedback should be submitted by creating an issue at GitHub issues. Select the related template and add the corresponding labels.</p>
+<h3 id="fix-bugs">Fix Bugs</h3>
+<p>You may look through the GitHub issues for bugs. Anything tagged with <code>bug report</code> is open to whoever wants to implement it.</p>
+<h3 id="implement-features">Implement Features</h3>
+<p>You may look through the GitHub issues for feature requests. Anything tagged with <code>feature request</code> is open to whoever wants to implement it.</p>
+<h3 id="write-documentation">Write Documentation</h3>
+<p>The documentation is either directly written into the Markdown files, or automatically extracted from the <code>jsdoc comments</code> by executing the <code>yarn docs</code> script, this will make use of <a href="https://onury.io/docma/">docma</a> to generate the documentation.</p>
+<p>In the first situation, you only need to change the markdown file and if its a new file, add it to the <code>docma.json</code> configuration. </p>
+<p>In the second situation, you need to change the <code>jsdoc comments</code> of the file that needs the documentation.</p>
+<h3 id="develop-a-plugin">Develop a plugin</h3>
+<p>You may develop a plugin creating your own repo. Just give your plugin a meaningful unique name, make sure the name follows the convention dragonbinder-plugin-{name} and, when finished, you can make a <a href="#pull-request-guide">pull request</a> updating the documentation with your plugin listed in the Plugin system section. </p>
+<h2 id="pull-request-guide">Pull Request Guide</h2>
+<hr />
+<p>Before you submit a pull request, check that it meets these guidelines. Please also read <a href="#code-style-guide">Code Style Guide</a>, <a href="#documentation-guide">Documentation Guide</a> and <a href="#testing-guide">Testing Guide</a> to ensure your merge request meet our requirements.</p>
+<ul>
+<li>Fork the repository. Create a new branch from the master branch. Give your new branch a meaningful name.</li>
+<li>Create a <a href="https://help.github.com/en/articles/about-pull-requests#draft-pull-requests">draft pull request</a> from your new branch to the master branch of the original repo. Give your pull request a meaningful name.</li>
+<li>Include <code>resolves #issue_number</code> in the description of the pull request if needed and briefly describe your contribution.</li>
+<li>Submit the pull request from the first day of your development (after your first commit).</li>
+<li>When the contribution is complete, make sure the pull request passed the CI tests. Change the draft pull request status to ready for review. Set the reviewer to <a href="https://github.com/Masquerade-Circus">@masquerade-circus</a>.</li>
+<li>For the case of bug fixes, add new test cases which would fail before your bug fix.</li>
+</ul>
+<h2 id="code-style-guide">Code Style Guide</h2>
+<hr />
+<p>This project use <a href="https://eslint.org/">eslint</a> with <a href="https://github.com/SonarSource/eslint-plugin-sonarjs">sonarjs eslint plugin</a> and <a href="https://prettier.io/">prettier</a> to format the code. Make sure you have configured your editor to format the files using this rules on save. Consider that <code>jsdoc comments</code> are not mandatory, but we need them to build a trustworthy documentation.</p>
+<h2 id="documentation-guide">Documentation Guide</h2>
+<hr />
+<p>The documentation should be provided in two ways, <code>jsdoc comments</code> and updating the readme file. We prefer the documentation to be as complete as possible.</p>
+<p>You only need to add tutorials to your code if you are contributing or updating a new feature.</p>
+<p>If you are updating via jsdoc comments or updating the readme file, you can make use of the <code>yarn docs:watch</code> script to watch for changes to the lib and the readme file. This script will rebuild the documentation on every change. </p>
+<p>To see the documentation locally, you can make use of the <code>yarn docs:serve</code>, this will serve the documentation at <a href="http://localhost:9000">http://localhost:9000</a>.</p>
+<p>Finally, before commit make use of <a href="https://www.npmjs.com/package/remark">remark</a> to format any updated markdown file. After format the updated files, build the documentation one last time using the <code>yarn docs</code> script. </p>
+<h2 id="testing-guide">Testing Guide</h2>
+<hr />
+<p>We make use of <a href="https://github.com/avajs/ava">AVA</a> to write tests. You should test your code by writing unit testing code in tests directory. The testing file name should be a {feature}_test.js file in the corresponding directory. The suffix _test is mandatory. </p>
+<p>You can make use of the <code>yarn dev:test:nyc</code> script to watch for changes and run the tests on every change. It would output the coverage information to the console and into a directory named coverage. Please make sure the code coverage percentage does not decrease after your contribution, otherwise, the code will not be merged.</p>
+<h2 id="attribution">Attribution</h2>
+<hr />
+<p>This contribution guide is adapted partially from the <a href="https://autokeras.com/temp/contribute/">Auto-Keras contributing guide</a>.</p>
+</body></html>
