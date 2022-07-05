@@ -2,7 +2,15 @@
   "name": "dragonbinder",
   "version": "2.2.0",
   "description": "1kb progressive state management library inspired by Vuex.",
+  "source": "lib/index.js",
   "main": "dist/dragonbinder.min.js",
+  "module": "dist/dragonbinder.mjs",
+  "unpkg": "dist/dragonbinder.min.js",
+  "browser": "dist/dragonbinder.min.js",
+  "exports": {
+    "import": "./dist/dragonbinder.mjs",
+    "require": "./dist/dragonbinder.js"
+  },
   "repository": "git@github.com:Masquerade-Circus/dragonbinder.git",
   "author": "Masquerade Circus <christian@masquerade-circus.net>",
   "license": "Apache-2.0",
@@ -16,52 +24,50 @@
     "redux",
     "flux",
     "manager",
-    "progresive"
+    "progressive"
   ],
   "engines": {
     "node": ">=8.15.0"
   },
   "engineStrict": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development node rollup.js",
-    "build": "cross-env NODE_ENV=production node rollup.js",
-    "dev:test": "cross-env NODE_ENV=development ava --watch --verbose",
-    "dev:test:nyc": "cross-env NODE_ENV=development nodemon -w ./tests -w ./lib --exec 'nyc --reporter=lcov --reporter=text ava --verbose'",
-    "test": "nyc ava",
+    "build": "node build.js",
+    "dev:test": "ava --watch --verbose",
+    "dev:test:nyc": "nodemon -w ./tests -w ./lib --exec 'nyc --reporter=lcov --reporter=text ava --verbose'",
+    "test": "npm run test:ava && npm run test:esm && npm run test:cjs && npm run test:min",
+    "test:ava": "nyc ava",
+    "test:esm": "node tests/test.mjs",
+    "test:cjs": "node tests/test.cjs",
+    "test:min": "node tests/test.min.js",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "docs": "docma -c docma.json",
-    "docs:watch": "nodemon -w ./lib -w ./*.md -w ./docma.json --exec 'yarn docs'",
+    "docs:watch": "nodemon -w ./lib -w ./*.md -w ./docma.json --exec 'npm run docs'",
     "docs:serve": "docma serve"
   },
   "devDependencies": {
-    "ava": "^2.4.0",
-    "coveralls": "^3.0.6",
-    "cross-env": "^6.0.0",
+    "ava": "^4.3.0",
+    "coveralls": "^3.1.1",
     "docma": "^3.2.2",
-    "eslint": "^6.4.0",
-    "eslint-plugin-sonarjs": "^0.4.0",
+    "esbuild": "^0.14.48",
+    "eslint": "^8.19.0",
+    "eslint-plugin-sonarjs": "^0.13.0",
     "esm": "^3.2.25",
-    "expect": "^24.9.0",
-    "nyc": "^14.1.1",
-    "rollup": "^1.21.4",
-    "rollup-plugin-buble": "^0.19.8",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-filesize": "^6.2.0",
-    "rollup-plugin-includepaths": "^0.2.3",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-progress": "^1.0.0",
-    "rollup-plugin-sourcemaps": "^0.4.2",
-    "rollup-plugin-terser": "^5.1.2"
+    "expect": "^28.1.1",
+    "nyc": "^15.1.0",
+    "terser": "^5.14.1"
   },
-  "resolutions": {
-    "clean-css": "^4.1.11"
+  "overrides": {
+    "is-url-superb": "^3.0.0",
+    "yargs": "^17.5.1"
   },
   "ava": {
     "files": [
       "tests/**/*_test.js"
     ],
-    "sources": [
-      "**/*.{js,jsx}"
+    "ignoredByWatcher": [
+      "dist",
+      "node_modules",
+      "docs"
     ],
     "failWithoutAssertions": false,
     "require": [
@@ -73,7 +79,7 @@
       "lib"
     ],
     "exclude": [
-      "rollup.js",
+      "build.js",
       "tests",
       "dist",
       "node_modules"
