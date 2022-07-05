@@ -42,11 +42,16 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "docs": "docma -c docma.json",
     "docs:watch": "nodemon -w ./lib -w ./*.md -w ./docma.json --exec 'npm run docs'",
-    "docs:serve": "docma serve"
+    "docs:serve": "docma serve",
+    "commit": "git add . && git-cz",
+    "release": "release-it --verbose",
+    "release-test": "release-it --dry-run --verbose"
   },
   "devDependencies": {
+    "@release-it/conventional-changelog": "^5.0.0",
     "ava": "^4.3.0",
     "coveralls": "^3.1.1",
+    "cz-conventional-changelog": "^3.3.0",
     "docma": "^3.2.2",
     "esbuild": "^0.14.48",
     "eslint": "^8.19.0",
@@ -54,11 +59,11 @@
     "esm": "^3.2.25",
     "expect": "^28.1.1",
     "nyc": "^15.1.0",
+    "release-it": "^15.1.1",
     "terser": "^5.14.1"
   },
   "overrides": {
-    "is-url-superb": "^3.0.0",
-    "yargs": "^17.5.1"
+    "minimist": "^1.2.6"
   },
   "ava": {
     "files": [
@@ -84,5 +89,87 @@
       "dist",
       "node_modules"
     ]
-  }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "release-it": {
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "infile": "CHANGELOG.md",
+        "preset": {
+          "name": "conventionalcommits",
+          "types": [
+            {
+              "type": "feat",
+              "section": "Features"
+            },
+            {
+              "type": "feature",
+              "section": "Features"
+            },
+            {
+              "type": "fix",
+              "section": "Bug Fixes"
+            },
+            {
+              "type": "perf",
+              "section": "Performance Improvements"
+            },
+            {
+              "type": "revert",
+              "section": "Reverts"
+            },
+            {
+              "type": "docs",
+              "section": "Documentation"
+            },
+            {
+              "type": "style",
+              "section": "Styles"
+            },
+            {
+              "type": "chore",
+              "section": "Miscellaneous Chores"
+            },
+            {
+              "type": "refactor",
+              "section": "Code Refactoring"
+            },
+            {
+              "type": "test",
+              "section": "Tests"
+            },
+            {
+              "type": "build",
+              "section": "Build System"
+            },
+            {
+              "type": "ci",
+              "section": "Continuous Integration"
+            }
+          ]
+        }
+      }
+    },
+    "git": {
+      "requireCleanWorkingDir": false
+    },
+    "github": {
+      "release": true
+    },
+    "npm": {
+      "publish": true
+    },
+    "hooks": {
+      "before:init": [
+        "npm run build",
+        "npm run test",
+        "npm run docs"
+      ]
+    }
+  },
+  "funding": "https://github.com/sponsors/Masquerade-Circus"
 }
