@@ -1,6 +1,6 @@
 {
   "name": "dragonbinder",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "1kb progressive state management library inspired by Vuex.",
   "source": "lib/index.js",
   "main": "dist/dragonbinder.min.js",
